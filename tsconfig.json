@@ -1,0 +1,68 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    // aponta para qual versão do node está usando
+    // https://www.typescriptlang.org/pt/tsconfig#target
+    "moduleResolution": "Node",
+    //especifica a estrategia de resolução
+    // https://www.typescriptlang.org/pt/tsconfig#moduleResolution
+    "module": "CommonJS",
+    // https://www.typescriptlang.org/pt/tsconfig#module
+    "lib": ["ES2022"],
+    // https://www.typescriptlang.org/pt/tsconfig#lib
+    "sourceMap": true,
+    // https://www.typescriptlang.org/pt/tsconfig#sourceMap
+    "outDir": "lib",
+    // qual o diretorio destino da compilação
+    // https://www.typescriptlang.org/pt/tsconfig#outDir
+    "strict": true,
+    // habilita verificações
+    // https://www.typescriptlang.org/pt/tsconfig#strict
+    "noImplicitAny": true,
+    // não permite em alguns momento o tipo any
+    // https://www.typescriptlang.org/pt/tsconfig#noImplicitAny
+    "strictNullChecks": true,
+    // se o chamado de uma function pode retornar null e vc utilizar o valor
+    // vai te fazer checa-lo
+    // https://www.typescriptlang.org/pt/tsconfig#strictNullChecks
+    "noImplicitThis": true,
+    // Emite erro nas expressões ‘this’ com tipo ‘any’ implícito.
+    // https://www.typescriptlang.org/pt/tsconfig#noImplicitThis
+    "resolveJsonModule": true,
+    // permite a importação de arquivo JSON
+    // https://www.typescriptlang.org/pt/tsconfig#resolveJsonModule
+    "alwaysStrict": true,
+    // https://www.typescriptlang.org/pt/tsconfig#alwaysStrict
+    "removeComments": true,
+    // remove os comentarios no codigo final .js
+    // https://www.typescriptlang.org/pt/tsconfig#removeComments
+    "noImplicitReturns": true,
+    // verifica todos os caminhos de return e espera em todos algum retorno
+    // https://www.typescriptlang.org/pt/tsconfig#noImplicitReturns
+    "esModuleInterop": true,
+    // https://www.typescriptlang.org/pt/tsconfig#esModuleInterop
+    "allowSyntheticDefaultImports": true,
+    // https://www.typescriptlang.org/pt/tsconfig#allowSyntheticDefaultImports
+    "baseUrl": ".",
+    // define a pasta de busca absoluta do codigo
+    // https://www.typescriptlang.org/pt/tsconfig#baseUrl
+    "experimentalDecorators": true,
+    // https://www.typescriptlang.org/pt/tsconfig#experimentalDecorators
+    "emitDecoratorMetadata": true,
+    // https://www.typescriptlang.org/pt/tsconfig#emitDecoratorMetadata
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@test/*": ["./test/*"]
+    },
+    // aponta path's do projeto
+    // https://www.typescriptlang.org/pt/tsconfig#paths
+    "rootDirs": ["./src", "./test"]
+    // https://www.typescriptlang.org/pt/tsconfig#rootDirs
+  },
+  "include": ["./src/**/*.ts", "./test/**/*.ts"],
+  // array com nomes dos arquivos que vão ser incluidos
+  // https://www.typescriptlang.org/pt/tsconfig#include
+  "exclude": ["./node_modules/*", "lib"]
+  // array com nomes dos arquivos que vão ser removidos das compilação
+  // https://www.typescriptlang.org/pt/tsconfig#exclude
+}
