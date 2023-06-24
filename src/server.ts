@@ -14,6 +14,7 @@ import logger from "./logger";
 import * as database from "@src/database";
 import { UserControllers } from "./controllers/user";
 import { apiErrorValidador } from "./middlewares/apiErrorValidador";
+import { NotFoundController } from "./controllers/notFound";
 
 export class SetupServer extends Server {
   constructor(private port = 3000) {
@@ -42,7 +43,8 @@ export class SetupServer extends Server {
 
   public setupControllers(): void {
     const userController = new UserControllers();
-    this.addControllers(userController);
+
+    this.addControllers([...[userController], new NotFoundController()]);
   }
 
   private setupErrorHandlers(): void {

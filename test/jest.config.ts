@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // configuração end to end do sistema
 // teste funcional
 // sobreescreve a configuração global
