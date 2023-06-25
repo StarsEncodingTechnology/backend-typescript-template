@@ -44,4 +44,16 @@ describe("Not Found", () => {
       error: "Not Found",
     });
   });
+
+  // it.only("Handler Error", async () => {
+  // @TODO - Verificar como fazer o teste de erro
+  //   const response = await global.testRequest
+  //     .post("/user/")
+  //     .send({ a: undefined });
+  //   expect(response.body).toEqual({
+  //     code: 400,
+  //     error: "Unexpected end of JSON input",
+  //   });
+  //   expect(response.status).toBe(400);
+  // });
 });

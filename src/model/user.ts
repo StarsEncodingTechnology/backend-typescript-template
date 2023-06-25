@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 import { AuthService } from "@src/services/authService";
-import { Validador } from "@src/util/validacoes/validarInfo";
+import Validador from "@src/util/validacoes/validarInfo";
 import { CUSTOM_VALIDATION } from "@src/util/validacoes/comum-todos";
 
 export interface User {

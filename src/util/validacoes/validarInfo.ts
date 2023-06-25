@@ -4,12 +4,12 @@
 
 import { Types } from "mongoose";
 
-export class Validador {
+const ValidarInfo = {
   /**
    * Valido a string e checa se é um CNPJ
    * @param info contém o possivel CNPJ
    */
-  public static CNPJ(info: string): boolean {
+  CNPJ(info: string): boolean {
     const cnpj = info.replace(/[^\d]+/g, "");
 
     if (cnpj == "") return false;
@@ -56,33 +56,34 @@ export class Validador {
     if (resultado != parseInt(digitos.charAt(1))) return false;
 
     return true;
-  }
+  },
   /**
    *  Valida se string só contém números.
    * @param info Contém o possivel Number
    */
-  public static Numero(info: string): boolean {
+  Numero(info: string): boolean {
     return /^\d+$/.test(info);
-  }
+  },
+
   /**
    * Valida se string é um CNAE
    * @param info Contém possivel Cnae
    */
-  public static CNAE(info: string): boolean {
+  CNAE(info: string): boolean {
     if (info.length != 7) return false;
     if (!this.Numero(info)) return false;
     return true;
-  }
+  },
 
   /**
    * Valida se string é um CEP
    * @param info Contém um possivel CEP
    */
-  public static CEP(info: string): boolean {
+  CEP(info: string): boolean {
     if (info.length != 8) return false;
     if (!this.Numero(info)) return false;
     return true;
-  }
+  },
 
   /**
    * Valida se number/tring está entre os parametros passados
@@ -91,11 +92,7 @@ export class Validador {
    * @param max  number maximo para validação
    * @returns Retorna um boolean, vindo true caso o número exista entre o min e max.
    */
-  public static EntreNumeros(
-    testado: string | number,
-    min: number,
-    max: number
-  ): boolean {
+  EntreNumeros(testado: string | number, min: number, max: number): boolean {
     if (typeof testado == "string")
       if (!this.Numero(testado)) return false;
       else testado = parseInt(testado);
@@ -103,13 +100,14 @@ export class Validador {
     if (testado >= min && testado <= max) return true;
 
     return false;
-  }
+  },
+
   /**
    * Faz a validação da informação se é realmente um
    * Object id mongoose
    * @param info
    */
-  public static ObjectIdMongoose(info: string): boolean {
+  ObjectIdMongoose(info: string): boolean {
     const { ObjectId } = Types;
     if (ObjectId.isValid(info)) {
       if (String(new ObjectId(info)) == info) return true;
@@ -118,12 +116,14 @@ export class Validador {
     }
 
     return false;
-  }
+  },
 
-  public static Booleano(info: string | boolean): boolean {
+  Booleano(info: string | boolean): boolean {
     if (typeof info == "string")
       info == "true" || info == "false" ? (info = true) : (info = "não é");
 
     return typeof info == "boolean";
-  }
-}
+  },
+};
+
+export default ValidarInfo;

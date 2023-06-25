@@ -15,8 +15,11 @@ export class AuthService {
    * @returns retorno uma promise de string, que retornar o texto password
    * já como hash.
    */
-  public static async hashPassword(password: string): Promise<string> {
-    const salt: number = parseInt(process.env.SALT as string);
+  public static async hashPassword(
+    password: string,
+    saltSecret = process.env.SALT as string
+  ): Promise<string> {
+    const salt: number = parseInt(saltSecret);
     return await bcrypt.hash(password, salt);
   }
   /**
@@ -38,8 +41,11 @@ export class AuthService {
    * @param payload é um obj que pode conter qualquer informação
    * @returns retornar uma string q é um codigo JWT
    */
-  public static gerarJWT(payload: object): string {
-    return jwt.sign(payload, process.env.SEGREDOJWT as string, {
+  public static gerarJWT(
+    payload: object,
+    sign = process.env.SEGREDOJWT as string
+  ): string {
+    return jwt.sign(payload, sign, {
       expiresIn: "24h",
     });
   }
@@ -49,10 +55,10 @@ export class AuthService {
    * @param token é uma string JWT
    * @returns retorna a informação que está dentro do JWT
    */
-  public static decodarJWT(token: string): DecodadaUserInterface {
-    return jwt.verify(
-      token,
-      process.env.SEGREDOJWT as string
-    ) as DecodadaUserInterface;
+  public static decodarJWT(
+    token: string,
+    sign = process.env.SEGREDOJWT as string
+  ): DecodadaUserInterface {
+    return jwt.verify(token, sign) as DecodadaUserInterface;
   }
 }

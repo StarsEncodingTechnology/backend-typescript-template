@@ -63,7 +63,7 @@ export class UserControllers extends BaseController {
   }
 
   @Get("authenticate")
-  public async rotaVazia(req: Request, res: Response): Promise<void> {
+  public async rotaVazia(_: Request, res: Response): Promise<void> {
     res.status(404).send(
       ApiError.format({
         code: 404,
