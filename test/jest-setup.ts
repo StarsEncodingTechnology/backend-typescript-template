@@ -1,9 +1,12 @@
-import { SetupServer } from "@src/server";
-import supertest from "supertest";
 import dotenv from "dotenv";
 dotenv.config({
   path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
 });
+
+//
+import { SetupServer } from "@src/server";
+import supertest from "supertest";
+
 let server: SetupServer;
 
 beforeAll(async () => {

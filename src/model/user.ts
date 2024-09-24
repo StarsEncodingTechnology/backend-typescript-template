@@ -1,31 +1,165 @@
-import mongoose, { Document } from "mongoose";
 import { AuthService } from "@src/services/authService";
-import Validador from "@src/util/validacoes/validarInfo";
 import { CUSTOM_VALIDATION } from "@src/util/validacoes/comum-todos";
+import mongoose, { Document } from "mongoose";
+import {
+  BaseDepoisToObject,
+  BaseModel,
+  BaseStringObjectId,
+  converteCasoNecessario,
+} from ".";
 
-export interface User {
-  _id?: string;
-  nome: string;
-  email: string;
-  password: string;
-  CNPJ: string;
+/**
+ * JWTInterface é o que é salvo no banco de dados
+ */
+export interface JWTInterface {
+  criadoEm: Date;
+  expiraEm: Date;
+  ip: string;
+  jwt: string;
+  ativo: boolean;
 }
 
-const schema = new mongoose.Schema(
+/**
+ * Faz parte do processo de recuperação de senha
+ */
+export interface TokenUser {
+  token: string;
+  expiraEm: Date;
+  ativo: boolean;
+}
+
+/**
+ * Enum que contém os estados que o usuário pode estar,
+ * Essa informação é checada no nivel de middleware
+ */
+export enum EnumEstadoUser {
+  /**
+   * Usuário está pronto para uso
+   */
+  ativo = "ativo",
+  /**
+   * Quando o user passar X tempo sem utilizar o sistema
+   */
+  inativo = "inativo",
+  /**
+   * Estado do usuário que foi bloqueado
+   */
+  bloqueado = "bloqueado",
+  /**
+   * Estado do usuário que não verificou o email
+   * @default
+   */
+  emailNaoVerificado = "emailNaoVerificado",
+}
+
+/**
+ * Antes da transformação do User com o .toJSON()
+ */
+export interface User extends BaseModel {
+  ativa?: BaseStringObjectId | null;
+  name?: string;
+  email: string;
+  password: string;
+  JWTs: JWTInterface[];
+  changePassword: TokenUser[];
+  estado: EnumEstadoUser;
+  /**
+   * É o campo cliente_id da api de pagamento
+   */
+  cliente_id?: string;
+}
+
+export interface UserComId extends User {
+  id: string;
+  ativa: string;
+}
+
+/**
+ * Depois da transformação do User com o .toJSON()
+ */
+export interface UserDepoisToJSON
+  extends Omit<
+    UserComId,
+    "password" | "JWTs" | "email" | "changePassword" | "cliente_id"
+  > {}
+
+export interface UserDepoisToObject
+  extends BaseDepoisToObject<UserComId, UserDepoisToJSON> {}
+
+const schema = new mongoose.Schema<User>(
   {
-    nome: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    name: { type: String },
+    email: { type: String, required: true },
     password: { type: String, required: true },
-    CNPJ: { type: String, required: true, unique: true },
+    JWTs: {
+      type: [
+        {
+          criadoEm: { type: Date, required: true },
+          expiraEm: { type: Date, required: true },
+          ip: { type: String, required: true },
+          jwt: { type: String, required: true },
+          ativo: { type: Boolean, required: true },
+        },
+      ],
+      default: [],
+    },
+    changePassword: {
+      type: [
+        {
+          token: { type: String, required: true },
+          expiraEm: { type: Date, required: true },
+          ativo: { type: Boolean, required: true },
+        },
+      ],
+      default: [],
+    },
+    estado: {
+      type: String,
+      required: true,
+      enum: Object.values(EnumEstadoUser),
+      default: EnumEstadoUser.emailNaoVerificado,
+    },
+    cliente_id: { type: String, required: false },
   },
   {
     toJSON: {
       transform: (_, ret): void => {
-        ret.id = ret._id;
+        ret.id = String(ret._id);
         delete ret._id;
         delete ret.__v;
+
+        ret.password = undefined;
+        ret.email = undefined;
+        ret.JWTs = undefined;
+        ret.changePassword = undefined;
+        ret.cliente_id = undefined;
       },
     },
+
+    toObject: {
+      transform: (_, ret): void => {
+        ret.id = String(ret._id);
+        delete ret._id;
+        delete ret.__v;
+
+        converteCasoNecessario(ret, ["_id"]);
+
+        ret.toJSON = () => {
+          return JSON.parse(
+            JSON.stringify({
+              ...ret,
+              toJSON: undefined,
+              password: undefined,
+              email: undefined,
+              JWTs: undefined,
+              changePassword: undefined,
+              cliente_id: undefined,
+            })
+          );
+        };
+      },
+    },
+
     versionKey: false,
   }
 );
@@ -43,27 +177,6 @@ schema.path("email").validate(
 // trás o erro da informação duplicada para a camada do mongoose
 // fazendo ele parar de retornar um erro diretamenta do MongoDB
 
-schema
-  .path("CNPJ")
-  .validate(
-    async (CNPJ: string) => {
-      const cnpjCount = await mongoose.models.User.countDocuments({
-        CNPJ: CNPJ,
-      });
-      return !cnpjCount;
-    },
-    "CNPJ já cadastrado.",
-    CUSTOM_VALIDATION.DUPLICATED
-  )
-  .validate(
-    // teste se cnpj é valido
-    async (CNPJ: string) => {
-      return Validador.CNPJ(CNPJ);
-    },
-    "CNPJ Invalido.",
-    CUSTOM_VALIDATION.CNPJINVALIDO
-  );
-
 schema.pre<UserModel>("save", async function (): Promise<void> {
   if (!this.password || !this.isModified("password")) return;
 
@@ -72,8 +185,8 @@ schema.pre<UserModel>("save", async function (): Promise<void> {
     this.password = passwordHash;
   } catch (e) {
     //@TODO validar isso aqui
-    console.error(`Erro no hash do password do usuario ${this.nome}`);
+    console.error(`Erro no hash do password do usuario ${this.name}`);
   }
 });
 
-export const User = mongoose.model<UserModel>("User", schema);
+export const User = mongoose.model<User>("User", schema);

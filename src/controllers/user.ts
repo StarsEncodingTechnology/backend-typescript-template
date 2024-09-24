@@ -1,23 +1,48 @@
-import { Controller, Get, Post } from "@overnightjs/core";
-import { BaseController } from ".";
+import {
+  ClassMiddleware,
+  Controller,
+  Get,
+  Middleware,
+  Post,
+} from "@overnightjs/core";
+import { authMiddleware } from "@src/middlewares/auth";
+import { UserRepository } from "@src/repositories";
+import LogErrorService from "@src/services/logErrorService";
+import UserService from "@src/services/userService";
+import RateLimitCreator from "@src/util/rateLimitDefault";
 import { Request, Response } from "express";
-import { User } from "@src/model/user";
-import { AuthService } from "@src/services/authService";
-import ApiError from "@src/util/errors/api-error";
+import { BaseController } from ".";
+
+const limit = RateLimitCreator(1, `So many try, try more later`, 100);
 
 @Controller("user")
+@ClassMiddleware(limit)
 export class UserControllers extends BaseController {
+  constructor(
+    protected userService: UserService,
+    protected userRepository: UserRepository,
+    logErrorService: LogErrorService
+  ) {
+    super(logErrorService);
+  }
+
   /**
    * Faz a criação de um novo usuario
    */
   @Post("")
   public async criarUser(req: Request, res: Response): Promise<void> {
     try {
-      const user = new User(req.body);
-      await user.save();
-      res.status(201).send({ code: 201, message: "Criado" });
+      const tokenCreate = await this.userService.create(req.body, req.ip);
+
+      this.apiResponse({
+        req,
+        res,
+        code: 201,
+        message: "Created",
+        data: tokenCreate,
+      });
     } catch (e) {
-      this.enviaErrorResponse(res, e);
+      this.apiError(req, res, e);
     }
   }
 
@@ -25,81 +50,50 @@ export class UserControllers extends BaseController {
    * Gera token JWT
    */
   @Post("authenticate")
-  public async gerarJWT(
-    req: Request,
-    res: Response
-  ): Promise<Response | undefined> {
+  public async gerarJWT(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
-      const user = await User.findOne({ email: email });
 
-      /*
-       Abaixo ele testa se usuario existe e se a senha envia pela
-       rota bate com a guardada no banco
-       */
-      if (!user)
-        return res
-          .status(401)
-          .send(
-            ApiError.format({ code: 401, error: "Usuário não encontrado." })
-          );
-      else if (!(await AuthService.comparaPassword(password, user.password)))
-        return res
-          .status(401)
-          .send(ApiError.format({ code: 401, error: "Senha inválido" }));
+      const responseAuth = await this.userService.autenticate(
+        email,
+        password,
+        req.ip
+      );
 
-      /* 
-        gera um JWT
-      */
-      const jwt = AuthService.gerarJWT({
-        id: user.id,
+      this.apiResponse({
+        req,
+        res,
+        code: 200,
+        message: "Authenticate",
+        data: responseAuth,
       });
-
-      return res.status(200).send({ apelido: user.nome, token: jwt });
     } catch (e) {
-      this.enviaErrorResponse(res, e);
+      this.apiError(req, res, e);
       return;
     }
   }
 
-  @Get("authenticate")
-  public async rotaVazia(_: Request, res: Response): Promise<void> {
-    res.status(404).send(
-      ApiError.format({
-        code: 404,
-        error:
-          "esssa rota precisa do parametro jwt, exemplo: user/authenticate/:jwt",
-      })
-    );
-  }
   /*
    * faz o teste no JWT passado como parametro
    */
   @Get("authenticate/:jwt")
+  @Middleware(authMiddleware)
   public async validarJWT(
     req: Request,
     res: Response
   ): Promise<void | Response> {
-    const jwt = req.params.jwt;
-
     try {
-      const decodado = AuthService.decodarJWT(jwt);
+      const userDecoded = req.decoded;
 
-      const user = await User.findById(decodado.id);
-
-      if (!user)
-        return res.status(401).send(
-          ApiError.format({
-            code: 400,
-            error: "Não autorizado, user não localizado",
-          })
-        );
-
-      res.status(200).send({ apelido: user.nome, token: jwt });
-    } catch (e) {
-      res
-        .status?.(401)
-        .send(ApiError.format({ code: 401, error: (e as Error).message }));
+      this.apiResponse({
+        req,
+        res,
+        code: 200,
+        message: "Valid JWT",
+        data: userDecoded,
+      });
+    } catch (error) {
+      this.apiError(req, res, error);
     }
   }
 }

@@ -1,11 +1,11 @@
-/* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-// arquivo de configuração do jest para falar com TS
-
+/* eslint-disable no-undef */
 const dotenv = require("dotenv");
 dotenv.config({
   path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
 });
+
+// arquivo de configuração do just para falar com TS
 
 const { resolve } = require("path");
 // busca o path para acessar os arquivos

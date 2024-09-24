@@ -7,40 +7,32 @@ import {
   Post,
   Put,
 } from "@overnightjs/core";
+import { InternalError } from "@src/util/errors/internal-error";
+import RateLimitCreator from "@src/util/rateLimitDefault";
 import { Request, Response } from "express";
-import ApiError from "@src/util/errors/api-error";
-import rateLimit from "express-rate-limit";
+import { BaseController } from ".";
 
 /**
  * limitador de requisições inexistentes
  */
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: Number(process.env.RATELIMITWINDOW_DEFALUT as string),
-  keyGenerator(req: Request): string {
-    return req.ip;
-  },
-  message:
-    "Muitas tentativas em uma rota inexiste, tente novamente em 1 minuto",
-  handler: (_, response, __, option) => {
-    response
-      .status(429)
-      .send(ApiError.format({ code: 429, error: option.message }));
-  },
-});
+const limiter = RateLimitCreator(1, "Router not found", 100);
 
 /**
  * Faz o controle de rotas inexistentes
  */
 @Controller("*")
-export class NotFoundController {
+export class NotFoundController extends BaseController {
   @Get()
   @Post()
   @Put()
   @Patch()
   @Delete()
   @Middleware(limiter)
-  public NotFound(_: Request, res: Response): void {
-    res.status(404).send(ApiError.format({ code: 404, error: "Not Found" }));
+  public async NotFound(req: Request, res: Response): Promise<void> {
+    await this.apiError(
+      req,
+      res,
+      new InternalError(`Router not found: ${req.url}`, 404)
+    );
   }
 }

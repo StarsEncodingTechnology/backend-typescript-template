@@ -6,7 +6,7 @@ declare global {
   // declarando no escopo global
   // linhas abaixo é para o eslint ignorar a var ali
   // eslint-disable-next-line
-  var testRequest: import("supertest").SuperTest<import("supertest").Test>;
+  var testRequest: import("supertest").Agent;
   // declarando a existencia do
   // testRequest no escopo global
   // como o tipo test do supertest

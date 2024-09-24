@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Request, Response, NextFunction } from "express";
-import ApiError from "@src/util/errors/api-error";
+import ResponseDefault from "@src/util/responseDefault";
+import { NextFunction, Request, Response } from "express";
 
 export interface HTTPError extends Error {
   status?: number;
@@ -9,18 +9,28 @@ export interface HTTPError extends Error {
 /**
  * Faz a captura de possiveis erros na primeira camada.
  * @param error erro HTTP
- * @param _  req mas n é utlizado
+ * @param req req do express
  * @param res res do express
  * @param __ next mas não é utilizado
  */
 export function apiErrorValidador(
   error: HTTPError,
-  _: Partial<Request>,
+  req: Partial<Request>,
   res: Response,
   __: NextFunction
 ): void {
   const errorCode = error.status || 500;
-  res
-    .status(errorCode)
-    .json(ApiError.format({ code: errorCode, error: error.message }));
+
+  const responseError = new ResponseDefault({
+    code: errorCode,
+    message: error.message,
+    url: req.url || "",
+    metodo: req.method || "",
+    error: {
+      classError: "ApiErrorValidador",
+      description: error.message,
+    },
+  });
+
+  res.status(errorCode).json(responseError.responseData);
 }
