@@ -2,7 +2,7 @@ import {
   ErrorsGroupedByCode,
   LogError,
   LogErrorAfterToObject,
-} from "@src/model/logError";
+} from "@src/models/logError";
 import Validator from "@src/util/validations/validateInfo";
 import mongoose from "mongoose";
 import { FilterOptions, LogErrorRepository } from "..";

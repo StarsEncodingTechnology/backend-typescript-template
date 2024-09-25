@@ -1,4 +1,4 @@
-import { UserAfterToJSON, UserState } from "@src/model/user";
+import { UserAfterToJSON, UserState } from "@src/models/user";
 import { UserMongoDBRepository } from "@src/repositories/uso/userMongoDBRepository";
 import { InternalError } from "@src/util/errors/internal-error";
 import bcrypt from "bcryptjs";

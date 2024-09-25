@@ -1,4 +1,4 @@
-import { BaseModel } from "@src/model";
+import { BaseModel } from "@src/models";
 import { CUSTOM_VALIDATION } from "@src/util/errors/allComum";
 import { InternalError } from "@src/util/errors/internal-error";
 import logger from "@src/util/logger";

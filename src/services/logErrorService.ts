@@ -2,7 +2,7 @@ import {
   ErrorsGroupedByCode,
   LogError,
   LogErrorAfterToObject,
-} from "@src/model/logError";
+} from "@src/models/logError";
 import { LogErrorRepository } from "@src/repositories";
 import cacheUtil from "@src/util/cache";
 import { Converter } from "@src/util/converter";

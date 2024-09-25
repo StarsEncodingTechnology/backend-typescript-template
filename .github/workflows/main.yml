@@ -36,3 +36,9 @@ jobs:
 
       - name: Run all tests
         run: yarn test
+
+      - name: Build the app
+        run: yarn build
+
+      - name: Calculate /lib directory size
+        run: du -sh ./lib

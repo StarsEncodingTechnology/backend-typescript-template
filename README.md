@@ -1,8 +1,22 @@
 # <b>Project default for a model typescript back-end</b>
 
-# Project Overview
-
 This project aims to demonstrate the code standards that should be used in a back-end application.
+The project uses Node.js with TypeScript, Express, MongoDB, and Jest.
+
+## Project Structure
+
+The project is organized as follows:
+
+- **src/**: Contains the source code of the application.
+  - **controllers/**: Handles the incoming requests and returns responses.
+  - **models/**: Defines the data models and schemas.
+  - **routes/**: Defines the application routes.
+  - **services/**: Contains the business logic of the application.
+  - **utils/**: Utility functions and helpers.
+  - **repositorys/**: Responsible for data access and communication with the database.
+- **tests/**: Contains the test cases for the application.
+
+This structure helps in maintaining a clean and organized codebase, making it easier to manage and scale the application.
 
 ## Running Locally
 

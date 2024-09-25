@@ -1,4 +1,4 @@
-import { User } from "@src/model/user";
+import { User } from "@src/models/user";
 import { UserRepository } from "@src/repositories";
 import { InternalError } from "@src/util/errors/internal-error";
 import { AuthService, GeneratedJWTInterface } from "./authService";

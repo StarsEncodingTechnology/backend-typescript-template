@@ -3,7 +3,7 @@ import {
   User,
   UserAfterToObject,
   UserToken,
-} from "@src/model/user";
+} from "@src/models/user";
 import { AuthService, GeneratedJWTInterface } from "@src/services/authService";
 import { InternalError } from "@src/util/errors/internal-error";
 import { UserRepository } from "..";

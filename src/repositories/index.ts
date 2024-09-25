@@ -2,13 +2,13 @@
 // Used to utilize multiple databases in the same system so that they do not interfere with each other
 // Preventing library errors from propagating to other environments
 
-import { User, UserAfterToObject, UserToken } from "@src/model/user";
+import { User, UserAfterToObject, UserToken } from "@src/models/user";
 
 import {
+  ErrorsGroupedByCode,
   LogError,
-  LogErrorDepoisToObject,
-  LogErrosAgrupadosPorCode,
-} from "@src/model/logError";
+  LogErrorAfterToObject,
+} from "@src/models/logError";
 import { GeneratedJWTInterface } from "@src/services/authService";
 import { PopulateOptions } from "mongoose";
 
@@ -153,9 +153,9 @@ export interface UserRepository
  * LogError Repository
  */
 export interface LogErrorRepository
-  extends BaseRepository<LogError, LogErrorDepoisToObject> {
+  extends BaseRepository<LogError, LogErrorAfterToObject> {
   /**
    * Groups errors by code
    */
-  groupByCode(filter: FilterOptions): Promise<LogErrosAgrupadosPorCode[]>;
+  groupByCode(filter: FilterOptions): Promise<ErrorsGroupedByCode[]>;
 }
