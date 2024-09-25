@@ -1,7 +1,7 @@
 import { BaseModel } from "@src/models";
-import { CUSTOM_VALIDATION } from "@src/util/errors/allComum";
-import { InternalError } from "@src/util/errors/internal-error";
-import logger from "@src/util/logger";
+import { CUSTOM_VALIDATION } from "@src/utils/errors/allComum";
+import { InternalError } from "@src/utils/errors/internal-error";
+import logger from "@src/utils/logger";
 import { Error, Model } from "mongoose";
 import { AttData, CustomPopulateOptions, FilterOptions } from ".";
 import {

@@ -1,6 +1,6 @@
 import { User } from "@src/models/user";
 import { UserRepository } from "@src/repositories";
-import { InternalError } from "@src/util/errors/internal-error";
+import { InternalError } from "@src/utils/errors/internal-error";
 import { AuthService, GeneratedJWTInterface } from "./authService";
 
 class UserServiceError extends InternalError {

@@ -1,5 +1,5 @@
 import { AuthService } from "@src/services/authService";
-import { CUSTOM_VALIDATION } from "@src/util/validations/comum";
+import { CUSTOM_VALIDATION } from "@src/utils/validations/comum";
 import mongoose, { Document } from "mongoose";
 import {
   BaseAfterToObject,

@@ -7,8 +7,8 @@ import {
   Post,
   Put,
 } from "@overnightjs/core";
-import { InternalError } from "@src/util/errors/internal-error";
-import RateLimitCreator from "@src/util/rateLimitDefault";
+import { InternalError } from "@src/utils/errors/internal-error";
+import RateLimitCreator from "@src/utils/rateLimitDefault";
 import { Request, Response } from "express";
 import { BaseController } from ".";
 

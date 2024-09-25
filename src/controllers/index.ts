@@ -4,11 +4,11 @@ import {
   DatabaseValidationError,
 } from "@src/repositories/repository";
 import LogErrorService from "@src/services/logErrorService";
-import { InternalError } from "@src/util/errors/internal-error";
-import logger from "@src/util/logger";
+import { InternalError } from "@src/utils/errors/internal-error";
+import logger from "@src/utils/logger";
 import ResponseDefault, {
   ResponseErrorDefault,
-} from "@src/util/responseDefault";
+} from "@src/utils/responseDefault";
 import { Request, Response } from "express";
 import { JsonWebTokenError } from "jsonwebtoken";
 import path from "path";

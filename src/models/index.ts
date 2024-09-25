@@ -1,4 +1,4 @@
-import Validator from "@src/util/validations/validateInfo";
+import Validator from "@src/utils/validations/validateInfo";
 import { Types } from "mongoose";
 
 export interface BaseModel {}

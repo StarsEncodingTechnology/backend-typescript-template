@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import ResponseDefault from "@src/util/responseDefault";
+import ResponseDefault from "@src/utils/responseDefault";
 import { NextFunction, Request, Response } from "express";
 
 export interface HTTPError extends Error {

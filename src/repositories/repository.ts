@@ -1,4 +1,4 @@
-import { InternalError } from "@src/util/errors/internal-error";
+import { InternalError } from "@src/utils/errors/internal-error";
 import {
   AttData,
   BaseRepository,

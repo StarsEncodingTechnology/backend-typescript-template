@@ -5,7 +5,7 @@ import {
   UserToken,
 } from "@src/models/user";
 import { AuthService, GeneratedJWTInterface } from "@src/services/authService";
-import { InternalError } from "@src/util/errors/internal-error";
+import { InternalError } from "@src/utils/errors/internal-error";
 import { UserRepository } from "..";
 import { BaseDefaultMongoDB } from "../baseDefaultMongoDB";
 

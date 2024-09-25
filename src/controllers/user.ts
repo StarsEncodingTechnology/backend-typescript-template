@@ -9,7 +9,7 @@ import { authMiddleware } from "@src/middlewares/auth";
 import { UserRepository } from "@src/repositories";
 import LogErrorService from "@src/services/logErrorService";
 import UserService from "@src/services/userService";
-import RateLimitCreator from "@src/util/rateLimitDefault";
+import RateLimitCreator from "@src/utils/rateLimitDefault";
 import { Request, Response } from "express";
 import { BaseController } from ".";
 

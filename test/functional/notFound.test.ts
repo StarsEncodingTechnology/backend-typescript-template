@@ -1,4 +1,4 @@
-import ResponseDefault from "@src/util/responseDefault";
+import ResponseDefault from "@src/utils/responseDefault";
 
 // Test all non-existent routes
 describe("Not Found", () => {

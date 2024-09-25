@@ -4,10 +4,10 @@ import {
   LogErrorAfterToObject,
 } from "@src/models/logError";
 import { LogErrorRepository } from "@src/repositories";
-import cacheUtil from "@src/util/cache";
-import { Converter } from "@src/util/converter";
-import { InternalError } from "@src/util/errors/internal-error";
-import Validator from "@src/util/validations/validateInfo";
+import cacheUtil from "@src/utils/cache";
+import { Converter } from "@src/utils/converter";
+import { InternalError } from "@src/utils/errors/internal-error";
+import Validator from "@src/utils/validations/validateInfo";
 
 class LogErrorServiceError extends InternalError {
   constructor(message: string, code = 500) {

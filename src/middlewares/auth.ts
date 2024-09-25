@@ -1,5 +1,5 @@
 import { AuthService, AuthServiceDecodeError } from "@src/services/authService";
-import ResponseDefault from "@src/util/responseDefault";
+import ResponseDefault from "@src/utils/responseDefault";
 import { NextFunction, Request, Response } from "express";
 
 /**

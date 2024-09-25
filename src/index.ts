@@ -1,4 +1,4 @@
-import "./util/module-alias";
+import "./utils/module-alias";
 
 import * as dotenv from "dotenv";
 dotenv.config({

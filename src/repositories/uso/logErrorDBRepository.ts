@@ -3,7 +3,7 @@ import {
   LogError,
   LogErrorAfterToObject,
 } from "@src/models/logError";
-import Validator from "@src/util/validations/validateInfo";
+import Validator from "@src/utils/validations/validateInfo";
 import mongoose from "mongoose";
 import { FilterOptions, LogErrorRepository } from "..";
 import { BaseDefaultMongoDB } from "../baseDefaultMongoDB";

@@ -1,6 +1,6 @@
 import { UserAfterToJSON, UserState } from "@src/models/user";
 import { UserMongoDBRepository } from "@src/repositories/uso/userMongoDBRepository";
-import { InternalError } from "@src/util/errors/internal-error";
+import { InternalError } from "@src/utils/errors/internal-error";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
