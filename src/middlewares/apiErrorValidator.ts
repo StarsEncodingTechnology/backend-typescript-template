@@ -13,7 +13,7 @@ export interface HTTPError extends Error {
  * @param res res do express
  * @param __ next mas não é utilizado
  */
-export function apiErrorValidador(
+export function apiErrorValidator(
   error: HTTPError,
   req: Partial<Request>,
   res: Response,

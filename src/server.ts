@@ -11,7 +11,7 @@ import expressPino from "express-pino-logger";
 import { NotFoundController } from "./controllers/notFound";
 import { UserControllers } from "./controllers/user";
 import logger from "./logger";
-import { apiErrorValidador } from "./middlewares/apiErrorValidador";
+import { apiErrorValidator } from "./middlewares/apiErrorValidator";
 import { LogErrorDBRepository } from "./repositories/uso/logErrorDBRepository";
 import { UserMongoDBRepository } from "./repositories/uso/userMongoDBRepository";
 import LogErrorService from "./services/logErrorService";
@@ -23,18 +23,18 @@ export class SetupServer extends Server {
   }
 
   /**
-   * Faz a iniciação do servidor
+   * Initializes the server
    */
   public async init(): Promise<void> {
     this.setupExpress();
     this.setupControllers();
     await this.dataBaseSetup();
-    // por ultimo
+    // lastly
     this.setupErrorHandlers();
   }
 
   /**
-   * Faz a configuração do express
+   * Configures express
    */
   public setupExpress(): void {
     this.app.use(json());
@@ -53,26 +53,26 @@ export class SetupServer extends Server {
    * Sets up the services with the provided repositories.
    * */
   private setupRepositoryServices() {
-    const repositorys = this.setupRepository();
+    const repositories = this.setupRepository();
 
-    const userService = new UserService(repositorys.userRepository);
-    const errorService = new LogErrorService(repositorys.errorRepository);
+    const userService = new UserService(repositories.userRepository);
+    const errorService = new LogErrorService(repositories.errorRepository);
 
     return {
       services: {
         userService,
         errorService,
       },
-      repositorys,
+      repositories,
     };
   }
 
   private setupControllers(): void {
-    const { services, repositorys } = this.setupRepositoryServices();
+    const { services, repositories } = this.setupRepositoryServices();
 
     const userController = new UserControllers(
       services.userService,
-      repositorys.userRepository,
+      repositories.userRepository,
       services.errorService
     );
 
@@ -85,7 +85,7 @@ export class SetupServer extends Server {
   }
 
   private setupErrorHandlers(): void {
-    this.app.use(apiErrorValidador);
+    this.app.use(apiErrorValidator);
   }
 
   public async dataBaseSetup(): Promise<void> {
@@ -93,16 +93,17 @@ export class SetupServer extends Server {
   }
 
   /**
-   * Faz o listen do app
+   * Starts the app
    */
   public start(): void {
     this.app.listen(this.port, () => {
-      logger.info(`Server iniciado em ${this.port}`);
+      logger.info(`Server started on ${this.port}`);
     });
   }
+
   /**
-   * Faz a captura e retorar a configuração atual do app
-   * @returns o aplication do express
+   * Captures and returns the current app configuration
+   * @returns the express application
    */
   get getApp() {
     return this.app;

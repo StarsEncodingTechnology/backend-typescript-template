@@ -29,6 +29,13 @@ process.on("uncaughtException", (error) => {
 
 (async () => {
   try {
+    /**
+     * Initializes a new instance of the SetupServer class with the specified port.
+     * The port is determined by the environment variable `PORT` if it exists,
+     * otherwise, it defaults to 3000.
+     *
+     * @constant {SetupServer} server - The server instance.
+     */
     const server = new SetupServer(
       parseInt((process.env.PORT || "") as string) || 3000
     );
