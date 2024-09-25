@@ -274,7 +274,7 @@ export abstract class BaseController {
       message,
       util: { ...util, ...utilC },
       url,
-      metodo: method,
+      method,
       data,
       error: error,
     });

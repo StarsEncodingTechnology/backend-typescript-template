@@ -1,61 +1,61 @@
 import {
+  ErrorsGroupedByCode,
   LogError,
-  LogErrorDepoisToObject,
-  LogErrosAgrupadosPorCode,
+  LogErrorAfterToObject,
 } from "@src/model/logError";
-import Validador from "@src/util/validacoes/validarInfo";
+import Validator from "@src/util/validations/validateInfo";
 import mongoose from "mongoose";
 import { FilterOptions, LogErrorRepository } from "..";
-import { BasePadraoMongoDB } from "../basePadraoMongoDB";
+import { BaseDefaultMongoDB } from "../baseDefaultMongoDB";
 
 export class LogErrorDBRepository
-  extends BasePadraoMongoDB<LogError, LogErrorDepoisToObject>
+  extends BaseDefaultMongoDB<LogError, LogErrorAfterToObject>
   implements LogErrorRepository
 {
   constructor(LogErrorModel = LogError) {
     super(LogErrorModel);
   }
 
-  private organizaFiltro(filtro: FilterOptions) {
-    const keys = Object.keys(filtro);
+  private organizeFilter(filter: FilterOptions) {
+    const keys = Object.keys(filter);
 
-    const novoFiltro: FilterOptions = {};
+    const newFilter: FilterOptions = {};
 
     keys.forEach((key) => {
-      if (filtro[key] !== undefined) {
-        const item = filtro[key];
+      if (filter[key] !== undefined) {
+        const item = filter[key];
 
-        if (typeof item == "string" && Validador.ObjectIdMongoose(item)) {
-          novoFiltro[key] = new mongoose.Types.ObjectId(item);
+        if (typeof item == "string" && Validator.ObjectIdMongoose(item)) {
+          newFilter[key] = new mongoose.Types.ObjectId(item);
           return;
         }
 
-        if (typeof item == "object" && Validador.isDate(String(item))) {
-          novoFiltro[key] = item;
+        if (typeof item == "object" && Validator.isDate(String(item))) {
+          newFilter[key] = item;
           return;
         }
 
         if (typeof item == "object" && item !== null) {
-          novoFiltro[key] = this.organizaFiltro(item as FilterOptions);
+          newFilter[key] = this.organizeFilter(item as FilterOptions);
           return;
         }
 
-        novoFiltro[key] = filtro[key];
+        newFilter[key] = filter[key];
       }
     });
 
-    return novoFiltro;
+    return newFilter;
   }
 
-  public async agruparPorCode(
-    filtro: FilterOptions
-  ): Promise<LogErrosAgrupadosPorCode[]> {
+  public async groupByCode(
+    filter: FilterOptions
+  ): Promise<ErrorsGroupedByCode[]> {
     try {
-      const filtroN = this.organizaFiltro(filtro);
+      const newFilter = this.organizeFilter(filter);
 
-      const agrupado = await this.model.aggregate([
+      const grouped = await this.model.aggregate([
         {
-          $match: filtroN,
+          $match: newFilter,
         },
         {
           $group: {
@@ -69,7 +69,7 @@ export class LogErrorDBRepository
         },
       ]);
 
-      return agrupado;
+      return grouped;
     } catch (error) {
       this.handlerError(error);
     }

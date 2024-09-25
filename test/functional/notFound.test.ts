@@ -1,6 +1,6 @@
 import ResponseDefault from "@src/util/responseDefault";
 
-// Faz o teste em todas as rotas inexistentes
+// Test all non-existent routes
 describe("Not Found", () => {
   it("get", async () => {
     const response = await global.testRequest.get("/v1/invalid-path");
@@ -38,7 +38,7 @@ describe("Not Found", () => {
   });
 
   // it.only("Handler Error", async () => {
-  // @TODO - Verificar como fazer o teste de erro
+  // @TODO - Check how to test error
   //   const response = await global.testRequest
   //     .post("/user/")
   //     .send({ a: undefined });

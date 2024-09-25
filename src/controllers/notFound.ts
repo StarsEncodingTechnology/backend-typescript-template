@@ -13,12 +13,12 @@ import { Request, Response } from "express";
 import { BaseController } from ".";
 
 /**
- * limitador de requisições inexistentes
+ * Rate limiter for non-existent requests
  */
-const limiter = RateLimitCreator(1, "Router not found", 100);
+const rateLimiter = RateLimitCreator(1, "Route not found", 100);
 
 /**
- * Faz o controle de rotas inexistentes
+ * Handles non-existent routes
  */
 @Controller("*")
 export class NotFoundController extends BaseController {
@@ -27,12 +27,12 @@ export class NotFoundController extends BaseController {
   @Put()
   @Patch()
   @Delete()
-  @Middleware(limiter)
-  public async NotFound(req: Request, res: Response): Promise<void> {
+  @Middleware(rateLimiter)
+  public async routeNotFound(req: Request, res: Response): Promise<void> {
     await this.apiError(
       req,
       res,
-      new InternalError(`Router not found: ${req.url}`, 404)
+      new InternalError(`Route not found: ${req.url}`, 404)
     );
   }
 }

@@ -6,7 +6,7 @@
  * @property {number} code - The status code of the response.
  * @property {string} message - The message associated with the response.
  * @property {string} url - The URL related to the response.
- * @property {string} metodo - The method used for the response.
+ * @property {string} method - The method used for the response.
  * @property {Object.<string, unknown>} [util] - Optional additional utility data.
  * @property {Object.<string, unknown>} [data] - Optional additional response data.
  * @property {ResponseErrorDefault} [error] - Optional error details if the response indicates an error.
@@ -21,8 +21,9 @@ export interface ResponseDefaultInterface {
   code: number;
   message: string;
   url: string;
-  metodo: string;
+  method: string;
   util?: { [key: string]: unknown };
+  link?: { [key: string]: unknown };
   data?: { [key: string]: unknown };
   error?: ResponseErrorDefault;
 }
@@ -34,8 +35,9 @@ export default class ResponseDefault {
   private code: number;
   private message: string;
   private url: string;
-  private metodo: string;
+  private method: string;
   private link?: { [key: string]: unknown };
+  private util?: { [key: string]: unknown };
   private data?: { [key: string]: unknown };
   private error: undefined | ResponseErrorDefault;
 
@@ -49,9 +51,10 @@ export default class ResponseDefault {
   constructor(obj: ResponseDefaultInterface) {
     this.code = obj.code;
     this.message = obj.message;
-    this.link = obj.util;
+    this.util = obj.util;
+    this.link = obj.link;
     this.url = obj.url;
-    this.metodo = obj.metodo;
+    this.method = obj.method;
     this.data = obj.data;
     this.error = obj.error;
   }
@@ -62,13 +65,14 @@ export default class ResponseDefault {
       message: this.message,
       url: this.url,
       link: this.link,
-      metodo: this.metodo,
+      method: this.method,
       error: this.error,
       data: this.data,
       versions: {
         version: this.version,
         mod: this.mod,
       },
+      util: this.util,
     };
   }
 
@@ -83,7 +87,7 @@ export default class ResponseDefault {
       typeof (obj as ResponseDefault).code === "number" &&
       typeof (obj as ResponseDefault).message === "string" &&
       typeof (obj as ResponseDefault).url === "string" &&
-      typeof (obj as ResponseDefault).metodo === "string" &&
+      typeof (obj as ResponseDefault).method === "string" &&
       (typeof (obj as ResponseDefault).link === "object" ||
         typeof (obj as ResponseDefault).link === "undefined") &&
       (typeof (obj as ResponseDefault).data === "object" ||

@@ -54,7 +54,7 @@ export class UserControllers extends BaseController {
     try {
       const { email, password } = req.body;
 
-      const responseAuth = await this.userService.autenticate(
+      const responseAuth = await this.userService.authenticate(
         email,
         password,
         req.ip
@@ -76,7 +76,7 @@ export class UserControllers extends BaseController {
   /*
    * faz o teste no JWT passado como parametro
    */
-  @Get("authenticate/:jwt")
+  @Get("authenticate/")
   @Middleware(authMiddleware)
   public async validarJWT(
     req: Request,

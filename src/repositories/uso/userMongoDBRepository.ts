@@ -1,13 +1,13 @@
 import {
   JWTInterface,
-  TokenUser,
   User,
-  UserDepoisToObject,
+  UserAfterToObject,
+  UserToken,
 } from "@src/model/user";
-import { AuthService, JWTGeradoInterface } from "@src/services/authService";
+import { AuthService, GeneratedJWTInterface } from "@src/services/authService";
 import { InternalError } from "@src/util/errors/internal-error";
 import { UserRepository } from "..";
-import { BasePadraoMongoDB } from "../basePadraoMongoDB";
+import { BaseDefaultMongoDB } from "../baseDefaultMongoDB";
 
 class UserRepositoryError extends InternalError {
   constructor(message: string, code = 500) {
@@ -16,46 +16,46 @@ class UserRepositoryError extends InternalError {
 }
 
 export class UserMongoDBRepository
-  extends BasePadraoMongoDB<User, UserDepoisToObject>
+  extends BaseDefaultMongoDB<User, UserAfterToObject>
   implements UserRepository
 {
-  // @TODO Retirar a dependencia do model de notificação
+  // @TODO Remove the dependency on the notification model
   constructor(userModel = User) {
     super(userModel);
   }
 
-  public async comparaSenha(
+  public async comparePassword(
     email: string,
     password: string
-  ): Promise<UserDepoisToObject | undefined> {
+  ): Promise<UserAfterToObject | undefined> {
     try {
       const user = await this.model.findOne({ email: email });
 
       if (!user) return;
 
-      const auth = await AuthService.comparaPassword(password, user.password);
+      const auth = await AuthService.comparePassword(password, user.password);
 
       if (!auth) return;
 
-      return user.toObject<UserDepoisToObject>();
+      return user.toObject<UserAfterToObject>();
     } catch (error) {
       this.handlerError(error);
     }
   }
 
-  public async adicionarJWTs(
+  public async addJWTs(
     id: string,
-    jwt: JWTGeradoInterface,
+    jwt: GeneratedJWTInterface,
     ip: string,
-    ativo = true
+    active = true
   ): Promise<boolean> {
     try {
       const att: JWTInterface = {
-        expiraEm: jwt.expiraEm,
-        criadoEm: new Date(),
+        expiresAt: jwt.expiresIn,
+        createdAt: new Date(),
         ip,
         jwt: jwt.jwt,
-        ativo,
+        active,
       };
 
       const user = await this.updateById(String(id), {
@@ -70,7 +70,7 @@ export class UserMongoDBRepository
     }
   }
 
-  public async atualizarLayout(id: string, layout: string): Promise<boolean> {
+  public async updateLayout(id: string, layout: string): Promise<boolean> {
     try {
       const user = await this.updateById(id, { layout });
 
@@ -82,42 +82,42 @@ export class UserMongoDBRepository
     }
   }
 
-  public async setTokenRecuperacaoSenha(
+  public async setPasswordRecoveryToken(
     id: string,
     token: string,
-    expiraEm: Date
-  ): Promise<TokenUser> {
+    expiresAt: Date
+  ): Promise<UserToken> {
     try {
       const user = await this.updateById(id, {
         $push: {
           changePassword: {
             token,
-            expiraEm,
-            ativo: true,
+            expiresAt,
+            active: true,
           },
         },
       });
 
-      if (!user) throw new Error("Erro ao criar token de recuperação de senha");
+      if (!user) throw new Error("Error creating password recovery token");
 
       return {
         token,
-        expiraEm,
-        ativo: true,
+        expiresAt,
+        active: true,
       };
     } catch (error) {
       this.handlerError(error);
     }
   }
 
-  public async existsTokenReset(token: string): Promise<boolean> {
+  public async existsResetToken(token: string): Promise<boolean> {
     try {
       const exists = await this.model.findOne({
         changePassword: {
           $elemMatch: {
             token,
-            ativo: true,
-            expiraEm: { $gte: new Date() },
+            active: true,
+            expiresIn: { $gte: new Date() },
           },
         },
       });
@@ -128,25 +128,25 @@ export class UserMongoDBRepository
     }
   }
 
-  public async setaTokenConfirmacaoEmail(
+  public async setEmailConfirmationToken(
     id: string,
     token: string,
-    expiraEm: Date
+    expiresIn: Date
   ): Promise<boolean> {
     try {
       const user = await this.updateById(id, {
         $push: {
-          tokenAtivaEmail: {
+          emailActivationToken: {
             token,
-            expiraEm,
-            ativo: true,
+            expiresIn,
+            active: true,
           },
         },
       });
 
       if (!user)
         throw new UserRepositoryError(
-          "Erro ao criar token de confirmação de email"
+          "Error creating email confirmation token"
         );
 
       return true;
@@ -155,16 +155,16 @@ export class UserMongoDBRepository
     }
   }
 
-  public async existsTokenConfirmacaoEmail(
+  public async existsEmailConfirmationToken(
     token: string
   ): Promise<string | undefined> {
     try {
       const exists = await this.model.findOne({
-        tokenAtivaEmail: {
+        emailActivationToken: {
           $elemMatch: {
             token,
-            ativo: true,
-            expiraEm: { $gte: new Date() },
+            active: true,
+            expiresIn: { $gte: new Date() },
           },
         },
       });

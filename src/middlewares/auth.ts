@@ -1,7 +1,4 @@
-import {
-  AuthService,
-  AuthServiceDecodarError,
-} from "@src/services/authService";
+import { AuthService, AuthServiceDecodeError } from "@src/services/authService";
 import ResponseDefault from "@src/util/responseDefault";
 import { NextFunction, Request, Response } from "express";
 
@@ -32,20 +29,17 @@ export async function authMiddleware(
 ): Promise<void> {
   const token = req.headers?.["x-access-token"];
   try {
-    const decoded = await AuthService.decodarJWT(
-      token as string,
-      req.url || ""
-    );
+    const decoded = await AuthService.decodeJWT(token as string, req.url || "");
 
     if (process.env.CHECKIP == "true" && decoded.ip !== req.ip)
-      throw new Error("IP invalido");
+      throw new Error("Invalid IP");
 
     req.decoded = decoded.userDecoded;
 
     next("");
   } catch (error) {
     const errorObj =
-      error instanceof AuthServiceDecodarError
+      error instanceof AuthServiceDecodeError
         ? {
             classError: error.classError,
             description: error.description,
@@ -55,7 +49,7 @@ export async function authMiddleware(
             description: `AuthClass: ${(error as Error).message}`,
           };
 
-    const code = error instanceof AuthServiceDecodarError ? error.code : 401;
+    const code = error instanceof AuthServiceDecodeError ? error.code : 401;
 
     const responseData = new ResponseDefault({
       code: code,
@@ -63,7 +57,7 @@ export async function authMiddleware(
       url: `${`${req.protocol}://${(req as Request).get("host")}${
         req.originalUrl
       }`}`,
-      metodo: req.method as string,
+      method: req.method || "",
       error: errorObj,
     });
 

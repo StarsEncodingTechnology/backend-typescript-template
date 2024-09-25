@@ -2,8 +2,8 @@ import { InternalError } from "@src/util/errors/internal-error";
 import {
   AttData,
   BaseRepository,
+  CustomPopulateOptions,
   FilterOptions,
-  PopulateOptionsPersonalizado,
 } from "./index";
 
 export class DatabaseError extends InternalError {
@@ -22,15 +22,15 @@ export abstract class Repository<T, K> implements BaseRepository<T, K> {
   public abstract create(data: Partial<T>): Promise<K>;
   public abstract findOne<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado
+    populate?: CustomPopulateOptions
   ): Promise<I | null>;
   public abstract findById<I = K>(id: string): Promise<I | null>;
   public abstract deleteMany(options: FilterOptions): Promise<number>;
   public abstract find<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado[]
+    populate?: CustomPopulateOptions[]
   ): Promise<I[]>;
   public abstract updateById(id: string, att: AttData): Promise<boolean>;
   public abstract deleteOne(options: FilterOptions): Promise<number>;
-  public abstract existe(options: FilterOptions): Promise<boolean>;
+  public abstract exists(options: FilterOptions): Promise<boolean>;
 }

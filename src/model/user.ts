@@ -1,90 +1,90 @@
 import { AuthService } from "@src/services/authService";
-import { CUSTOM_VALIDATION } from "@src/util/validacoes/comum-todos";
+import { CUSTOM_VALIDATION } from "@src/util/validations/comum";
 import mongoose, { Document } from "mongoose";
 import {
-  BaseDepoisToObject,
+  BaseAfterToObject,
   BaseModel,
   BaseStringObjectId,
-  converteCasoNecessario,
+  convertIfNecessary,
 } from ".";
 
 /**
  * JWTInterface é o que é salvo no banco de dados
  */
 export interface JWTInterface {
-  criadoEm: Date;
-  expiraEm: Date;
+  createdAt: Date;
+  expiresAt: Date;
   ip: string;
   jwt: string;
-  ativo: boolean;
+  active: boolean;
 }
 
 /**
- * Faz parte do processo de recuperação de senha
+ * Part of the password recovery process
  */
-export interface TokenUser {
+export interface UserToken {
   token: string;
-  expiraEm: Date;
-  ativo: boolean;
+  expiresAt: Date;
+  active: boolean;
 }
 
 /**
- * Enum que contém os estados que o usuário pode estar,
- * Essa informação é checada no nivel de middleware
+ * Enum containing the states a user can be in,
+ * This information is checked at the middleware level
  */
-export enum EnumEstadoUser {
+export enum UserState {
   /**
-   * Usuário está pronto para uso
+   * User is ready for use
    */
-  ativo = "ativo",
+  active = "active",
   /**
-   * Quando o user passar X tempo sem utilizar o sistema
+   * When the user goes X time without using the system
    */
-  inativo = "inativo",
+  inactive = "inactive",
   /**
-   * Estado do usuário que foi bloqueado
+   * State of the user who was blocked
    */
-  bloqueado = "bloqueado",
+  blocked = "blocked",
   /**
-   * Estado do usuário que não verificou o email
+   * State of the user who did not verify the email
    * @default
    */
-  emailNaoVerificado = "emailNaoVerificado",
+  emailNotVerified = "emailNotVerified",
 }
 
 /**
- * Antes da transformação do User com o .toJSON()
+ * Before transforming the User with .toJSON()
  */
 export interface User extends BaseModel {
-  ativa?: BaseStringObjectId | null;
+  active?: BaseStringObjectId | null;
   name?: string;
   email: string;
   password: string;
   JWTs: JWTInterface[];
-  changePassword: TokenUser[];
-  estado: EnumEstadoUser;
+  changePassword: UserToken[];
+  state: UserState;
   /**
-   * É o campo cliente_id da api de pagamento
+   * It is the cliente_id field of the payment API
    */
-  cliente_id?: string;
+  clientId?: string;
 }
 
-export interface UserComId extends User {
+export interface UserWithId extends User {
   id: string;
-  ativa: string;
+  active: string;
 }
 
 /**
- * Depois da transformação do User com o .toJSON()
+ * After transforming the User with .toJSON()
  */
-export interface UserDepoisToJSON
+export interface UserAfterToJSON
   extends Omit<
-    UserComId,
-    "password" | "JWTs" | "email" | "changePassword" | "cliente_id"
+    UserWithId,
+    "password" | "JWTs" | "email" | "changePassword" | "clientId"
   > {}
 
-export interface UserDepoisToObject
-  extends BaseDepoisToObject<UserComId, UserDepoisToJSON> {}
+export interface UserAfterToObject
+  extends BaseAfterToObject<UserWithId, UserAfterToJSON> {}
 
 const schema = new mongoose.Schema<User>(
   {
@@ -94,11 +94,11 @@ const schema = new mongoose.Schema<User>(
     JWTs: {
       type: [
         {
-          criadoEm: { type: Date, required: true },
-          expiraEm: { type: Date, required: true },
+          createdAt: { type: Date, required: true },
+          expiresAt: { type: Date, required: true },
           ip: { type: String, required: true },
           jwt: { type: String, required: true },
-          ativo: { type: Boolean, required: true },
+          active: { type: Boolean, required: true },
         },
       ],
       default: [],
@@ -107,19 +107,19 @@ const schema = new mongoose.Schema<User>(
       type: [
         {
           token: { type: String, required: true },
-          expiraEm: { type: Date, required: true },
-          ativo: { type: Boolean, required: true },
+          expiresAt: { type: Date, required: true },
+          active: { type: Boolean, required: true },
         },
       ],
       default: [],
     },
-    estado: {
+    state: {
       type: String,
       required: true,
-      enum: Object.values(EnumEstadoUser),
-      default: EnumEstadoUser.emailNaoVerificado,
+      enum: Object.values(UserState),
+      default: UserState.emailNotVerified,
     },
-    cliente_id: { type: String, required: false },
+    clientId: { type: String, required: false },
   },
   {
     toJSON: {
@@ -132,7 +132,7 @@ const schema = new mongoose.Schema<User>(
         ret.email = undefined;
         ret.JWTs = undefined;
         ret.changePassword = undefined;
-        ret.cliente_id = undefined;
+        ret.clientId = undefined;
       },
     },
 
@@ -142,7 +142,7 @@ const schema = new mongoose.Schema<User>(
         delete ret._id;
         delete ret.__v;
 
-        converteCasoNecessario(ret, ["_id"]);
+        convertIfNecessary(ret, ["_id"]);
 
         ret.toJSON = () => {
           return JSON.parse(
@@ -153,7 +153,7 @@ const schema = new mongoose.Schema<User>(
               email: undefined,
               JWTs: undefined,
               changePassword: undefined,
-              cliente_id: undefined,
+              clientId: undefined,
             })
           );
         };
@@ -171,11 +171,9 @@ schema.path("email").validate(
     const emailCount = await mongoose.models.User.countDocuments({ email });
     return !emailCount;
   },
-  "Email já cadastrado.",
+  "Email already registered.",
   CUSTOM_VALIDATION.DUPLICATED
 );
-// trás o erro da informação duplicada para a camada do mongoose
-// fazendo ele parar de retornar um erro diretamenta do MongoDB
 
 schema.pre<UserModel>("save", async function (): Promise<void> {
   if (!this.password || !this.isModified("password")) return;
@@ -184,8 +182,7 @@ schema.pre<UserModel>("save", async function (): Promise<void> {
     const passwordHash = await AuthService.hashPassword(this.password);
     this.password = passwordHash;
   } catch (e) {
-    //@TODO validar isso aqui
-    console.error(`Erro no hash do password do usuario ${this.name}`);
+    console.error(`Error hashing the password for user ${this.name}`);
   }
 });
 

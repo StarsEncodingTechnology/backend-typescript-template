@@ -25,7 +25,7 @@ export function apiErrorValidador(
     code: errorCode,
     message: error.message,
     url: req.url || "",
-    metodo: req.method || "",
+    method: req.method || "",
     error: {
       classError: "ApiErrorValidador",
       description: error.message,

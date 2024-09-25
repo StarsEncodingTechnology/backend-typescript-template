@@ -29,7 +29,7 @@ function RateLimitCreator(
         url: `${request.protocol}://${request.get("host")}${
           request.originalUrl
         }`,
-        metodo: request.method,
+        method: request.method,
         error: option.message,
       });
 

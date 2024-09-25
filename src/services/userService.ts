@@ -1,7 +1,7 @@
 import { User } from "@src/model/user";
 import { UserRepository } from "@src/repositories";
 import { InternalError } from "@src/util/errors/internal-error";
-import { AuthService, JWTGeradoInterface } from "./authService";
+import { AuthService, GeneratedJWTInterface } from "./authService";
 
 class UserServiceError extends InternalError {
   constructor(message: string, code = 500) {
@@ -12,44 +12,44 @@ class UserServiceError extends InternalError {
 export default class UserService {
   constructor(protected userRepository: UserRepository) {}
 
-  private validateDate(data: Partial<User>, allData = false): void {
+  private validateData(data: Partial<User>, allData = false): void {
     const { email, password, name } = data;
 
-    // Será que isso é necessário?
-    // @TODO Verificar se isso é necessário
+    // Is this necessary?
+    // @TODO Verify if this is necessary
     if (allData || email !== undefined) {
       if (typeof email !== "string") {
-        throw new UserServiceError("Email inválido", 422);
+        throw new UserServiceError("Invalid email", 422);
       }
     }
 
     if (allData || password !== undefined) {
       if (typeof password !== "string") {
-        throw new UserServiceError("Senha inválida", 422);
+        throw new UserServiceError("Invalid password", 422);
       }
     }
 
     if (allData || name !== undefined) {
       if (name && typeof name !== "string") {
-        throw new UserServiceError("Nome inválido", 422);
+        throw new UserServiceError("Invalid name", 422);
       }
     }
   }
 
   /**
-   * Criate a new user
+   * Create a new user
    * @param data
    * @returns
    */
   public async create(
-    data: User,
+    data: Partial<User>,
     ip?: string
   ): Promise<{
     name?: string;
-    token: JWTGeradoInterface;
+    token: GeneratedJWTInterface;
     user_id: string;
   }> {
-    this.validateDate(data);
+    this.validateData(data, true);
 
     const user = await this.userRepository.create({
       name: data.name,
@@ -57,39 +57,39 @@ export default class UserService {
       password: data.password,
     });
 
-    const tokenAndName = await this.autenticate(data.email, data.password, ip);
+    const tokenAndName = await this.authenticate(data.email, data.password, ip);
 
     return { ...tokenAndName, user_id: user.id };
   }
 
   /**
-   * Aythenticate user
+   * Authenticate user
    * @param email
    * @param password
    * @returns
    */
-  public async autenticate(
+  public async authenticate(
     email?: string,
     password?: string,
     ip?: string
   ): Promise<{
     name?: string;
-    token: JWTGeradoInterface;
+    token: GeneratedJWTInterface;
   }> {
     if (!email || !password)
-      throw new UserServiceError("Email e senha são obrigatórios", 422);
+      throw new UserServiceError("Email and password are required", 422);
 
-    this.validateDate({ email, password });
+    this.validateData({ email, password });
 
-    const user = await this.userRepository.comparaSenha(email, password);
+    const user = await this.userRepository.comparePassword(email, password);
 
-    if (!user) throw new UserServiceError("Usuario não encontrado", 401);
+    if (!user) throw new UserServiceError("Invalid password", 401);
 
-    const jwt = AuthService.gerarJWT({
+    const jwt = AuthService.generateJWT({
       id: user.id,
     });
 
-    await this.userRepository.adicionarJWTs(user.id, jwt, ip || "");
+    await this.userRepository.addJWTs(user.id, jwt, ip || "");
 
     return { name: user.name, token: jwt };
   }

@@ -1,81 +1,81 @@
-interface IPrimeiroEUltimoDiaDoMes {
-  primeiroDia: Date;
-  ultimoDia: Date;
+interface IFirstAndLastDayOfMonth {
+  firstDay: Date;
+  lastDay: Date;
 }
 
 /**
- * Enum para os dias da semana
+ * Enum for the days of the week
  */
-enum SemanaEnum {
-  segunda = "segunda",
-  terca = "terca",
-  quarta = "quarta",
-  quinta = "quinta",
-  sexta = "sexta",
-  sabado = "sabado",
-  domingo = "domingo",
+enum WeekEnum {
+  monday = "monday",
+  tuesday = "tuesday",
+  wednesday = "wednesday",
+  thursday = "thursday",
+  friday = "friday",
+  saturday = "saturday",
+  sunday = "sunday",
 }
 
-export interface IDiaMesAno {
-  dia: number;
-  mes: number;
-  ano: number;
-  diaSemana: SemanaEnum;
+export interface IDayMonthYear {
+  day: number;
+  month: number;
+  year: number;
+  dayOfWeek: WeekEnum;
 }
 
 /**
- * OBJ que contém diversos tipos de conversão
+ * OBJ that contains various types of conversion
  */
 export class Converter {
   /**
-   * Converte a string de data padrão Sped para Date
-   * @example Recebe 30062022 e devolve o tipo Date
-   * @returns retorna o Date convertido
+   * Converts the standard Sped date string to Date
+   * @example Receives 30062022 and returns the Date type
+   * @returns returns the converted Date
    */
-  public static dataNotaParaDate(data: string): Date {
-    const dia = data.substring(0, 2);
-    const mes = data.substring(2, 4);
-    const ano = data.substring(4);
-    return new Date(`${mes}/${dia}/${ano}`);
+  public static spedDateToDate(date: string): Date {
+    const day = date.substring(0, 2);
+    const month = date.substring(2, 4);
+    const year = date.substring(4);
+    return new Date(`${month}/${day}/${year}`);
   }
 
   /**
-   *Converte uma string com , para number
-   * @example string "1,22" para number 1.22
+   * Converts a string with , to number
+   * @example string "1,22" to number 1.22
    */
-  public static stringComVirgulaParaNumber(texto: string): number {
-    return parseFloat(texto.replaceAll(",", "."));
+  public static stringWithCommaToNumber(text: string): number {
+    return parseFloat(text.replaceAll(",", "."));
   }
 
   /**
-   * Arrebonda e retira casas decimais além do tamanho
-   * @param number é o numero a ser arredondado
-   * @param tamanho é a multiplicação a ser adicionada
-   * @example tamanho = 100 e num = 10,12321 resulta em 10,12
-   * @exampletamanho = 100 e num = 12.21921 resulta em 12.22
+   * Rounds and removes decimal places beyond the size
+   * @param number is the number to be rounded
+   * @param size is the multiplication to be added
+   * @example size = 100 and num = 10.12321 results in 10.12
+   * @example size = 100 and num = 12.21921 results in 12.22
    */
-  public static arredondaCasasDecimais(num: number, tamanho = 100): number {
-    return Math.round(num * tamanho) / tamanho;
+  public static roundDecimalPlaces(num: number, size = 100): number {
+    return Math.round(num * size) / size;
   }
 
   /**
-   * Converter um número em uma string padrão com duas casas depois da virgula
-   * @example 1.213123 para "1,21"
-   * @param number um numero
+   * Converts a number to a standard string with two decimal places
+   * @example 1.213123 to "1,21"
+   * @param number a number
    */
-  public static numParaStringDuasCasas(number: number): string {
-    return this.arredondaCasasDecimais(number).toString().replace(".", ",");
+  public static numberToStringTwoDecimalPlaces(number: number): string {
+    return this.roundDecimalPlaces(number).toString().replace(".", ",");
   }
 
   /**
-   * Converte o número em uma string com duas casas depois da virgula
-   * @example 12.1 para "12,10"
-   * @example 5 para "5,00"
-   * @example 12.2191 para "12,22"
-   * @param number Número
+   * Converts the number to a string with two decimal places
+   * @example 12.1 to "12,10"
+   * @example 5 to "5,00"
+   * @example 12.2191 to "12,22"
+   * @param number Number
    */
-  public static padraoReal(number: number): string {
-    const text = this.numParaStringDuasCasas(number || 0);
+  public static toRealPattern(number: number): string {
+    const text = this.numberToStringTwoDecimalPlaces(number || 0);
 
     if (text.indexOf(",") != -1) {
       if ((text.split(",").pop() as string).length == 1) return `${text}0`;
@@ -86,78 +86,78 @@ export class Converter {
   }
 
   /**
-   * Converter o dado tipo Date para string
-   * @example 2022-01-21T03:00:00.000Z para "21012022"
-   * @example new Date("01012022") para "01012022"
-   * @param data Do tipo date
-   * @returns  retorna a data ddmmyyyy
+   * Converts the Date type to string
+   * @example 2022-01-21T03:00:00.000Z to "21012022"
+   * @example new Date("01012022") to "01012022"
+   * @param date Date type
+   * @returns returns the date ddmmyyyy
    */
-  public static dataParaString(data: Date): string {
-    return `${this.adicionaZerosEsquerda(
-      data.getUTCDate().toString(),
+  public static dateToString(date: Date): string {
+    return `${this.addLeadingZeros(
+      date.getUTCDate().toString(),
       "00"
-    )}${this.adicionaZerosEsquerda(
-      (data.getUTCMonth() + 1).toString(),
+    )}${this.addLeadingZeros(
+      (date.getUTCMonth() + 1).toString(),
       "00"
-    )}${data.getUTCFullYear().toString()}`;
+    )}${date.getUTCFullYear().toString()}`;
   }
 
   /**
-   * Converte dia ou mês para o padrão arquivo
-   * @example "1" para "01"
-   * @param info Data info
+   * Converts day or month to the file pattern
+   * @example "1" to "01"
+   * @param info Date info
    */
-  public static padraoDiaMes(info: string): string {
+  public static dayMonthPattern(info: string): string {
     return info.length == 1 ? `0${info}` : info;
   }
 
   /**
-   * Faz a mesclagem da informação
-   * @param info informação a ser mesclada
-   * @param tamanho colocar quantos zeros voce quer "0000"
+   * Merges the information
+   * @param info information to be merged
+   * @param size put how many zeros you want "0000"
    */
-  public static adicionaZerosEsquerda(info: string, tamanho: string): string {
-    return (tamanho + info).slice(tamanho.length * -1);
+  public static addLeadingZeros(info: string, size: string): string {
+    return (size + info).slice(size.length * -1);
   }
 
   /**
-   * adicionar zeros a direita
-   * @param tamanho zeros que serão adicionados
+   * Adds zeros to the right
+   * @param size zeros to be added
    */
-  public static adicionaZerosDireita(info: string, tamanho: number): string {
+  public static addTrailingZeros(info: string, size: number): string {
     if (info.indexOf(",") == -1) info = `${info},00`;
 
-    const depoisVirgula = info.split(",").pop() as string;
+    const afterComma = info.split(",").pop() as string;
 
-    const diferenca = tamanho - depoisVirgula.length;
+    const difference = size - afterComma.length;
 
-    if (diferenca < 0)
-      return this.arredondaCasasDecimais(
+    if (difference < 0)
+      return this.roundDecimalPlaces(
         parseFloat(info.replaceAll(",", ".")),
-        10 ** tamanho
+        10 ** size
       )
         .toString()
         .replace(".", ",");
 
-    return info.padEnd(info.length + diferenca, "0");
+    return info.padEnd(info.length + difference, "0");
   }
 
   /**
-   * Remove letras da string
+   * Removes letters from the string
    */
-  public static removeLetras(info: string): string {
+  public static removeLetters(info: string): string {
     return info.replaceAll(/[^0-9]/g, "");
   }
 
   /**
-   * UF com base em codigo de cidade
+   * State based on city code
    */
-  public static ufComBaseEmCodigoCidade(codigoCidade: string): string {
-    if (codigoCidade == "9999999") return "EX";
-    const uf = codigoCidade.substring(0, 2);
-    if (uf == "00") return "EX";
+  public static stateBasedOnCityCode(cityCode: string): string {
+    if (cityCode == "9999999") return "EX";
+    const state = cityCode.substring(0, 2);
+    if (state == "00") return "EX";
 
-    switch (uf) {
+    switch (state) {
       case "35":
         return "SP";
       case "15":
@@ -212,44 +212,44 @@ export class Converter {
   }
 
   /**
-   * Deixa a string com o tamanho desejado
-   * @param data  string a ser cortada
-   * @param tamanho  tamanho da string
-   * @exemple "1234567890" com tamanho 5 resulta em "67890"
+   * Trims the string to the desired length
+   * @param data string to be trimmed
+   * @param size length of the string
+   * @example "1234567890" with size 5 results in "67890"
    */
-  public static CortaStringAoContrario(data: string, tamanho: number): string {
-    return data.substring(data.length - tamanho);
+  public static trimStringFromEnd(data: string, size: number): string {
+    return data.substring(data.length - size);
   }
 
   /**
-   * Faz a criação de um tipo Date sem o fuso horário,
-   * mas com hora minuto em es zerado
-   * @param ano
-   * @param mes
-   * @param dia
-   * @param hora
-   * @param minuto
-   * @param segundo
+   * Creates a Date type without the time zone,
+   * but with hour minute in zero
+   * @param year
+   * @param month
+   * @param day
+   * @param hour
+   * @param minute
+   * @param second
    * @returns
    */
-  public static criarDate(
-    ano?: number,
-    mes?: number,
-    dia?: number,
-    hora?: number,
-    minuto?: number,
-    segundo?: number
+  public static createDate(
+    year?: number,
+    month?: number,
+    day?: number,
+    hour?: number,
+    minute?: number,
+    second?: number
   ): Date {
-    const DateLocal = new Date();
+    const localDate = new Date();
 
-    ano = typeof ano == "number" ? ano : DateLocal.getUTCFullYear();
-    mes = typeof mes == "number" ? mes : DateLocal.getUTCMonth();
-    dia = typeof dia == "number" ? dia : DateLocal.getUTCDate();
-    hora = typeof hora == "number" ? hora : 0;
-    minuto = typeof minuto == "number" ? minuto : 0;
-    segundo = typeof segundo == "number" ? segundo : 1;
+    year = typeof year == "number" ? year : localDate.getUTCFullYear();
+    month = typeof month == "number" ? month : localDate.getUTCMonth();
+    day = typeof day == "number" ? day : localDate.getUTCDate();
+    hour = typeof hour == "number" ? hour : 0;
+    minute = typeof minute == "number" ? minute : 0;
+    second = typeof second == "number" ? second : 1;
 
-    const a = new Date(ano, mes, dia, hora, minuto, segundo);
+    const a = new Date(year, month, day, hour, minute, second);
     const offset = a.getTimezoneOffset();
     const s = new Date(a.getTime() - offset * 60 * 1000);
 
@@ -257,161 +257,161 @@ export class Converter {
   }
 
   /**
-   * Faz a transformação de um tipo Date em seu primeiro e ultimo segundo do mês
-   * @param date Data selecionada para capturar
-   * @returns Um objeto com os dados do primeiro segundo e ultimo do mês
+   * Transforms a Date type into its first and last second of the month
+   * @param date Selected date to capture
+   * @returns An object with the data of the first and last second of the month
    * @example
    *         2022-01-21T03:00:00.000Z
-   *         para
-   *         #primeiroDia: 2022-01-01T03:00:00.000Z
-   *         #ultimoDia: 2022-01-31T03:00:00.000Z
+   *         to
+   *         #firstDay: 2022-01-01T03:00:00.000Z
+   *         #lastDay: 2022-01-31T03:00:00.000Z
    */
-  public static dateParaUltimoEPrimeiroDiaDoMes(
+  public static dateToFirstAndLastDayOfMonth(
     date: Date
-  ): IPrimeiroEUltimoDiaDoMes {
-    // Obtenha o ano, mês e dia da data original.
-    const ano = date.getUTCFullYear();
-    const mes = date.getUTCMonth();
+  ): IFirstAndLastDayOfMonth {
+    // Get the year, month, and day of the original date.
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
 
-    // Crie uma nova data com o ano, mês e dia obtidos na etapa anterior.
-    const primeiroDiaDoMes = this.criarDate(ano, mes, 1, 0, 0, 1);
+    // Create a new date with the year, month, and day obtained in the previous step.
+    const firstDayOfMonth = this.createDate(year, month, 1, 0, 0, 1);
 
-    const ultimoDiaDoMes = this.criarDate(ano, mes + 1, 0, 23, 59, 59);
+    const lastDayOfMonth = this.createDate(year, month + 1, 0, 23, 59, 59);
 
     return {
-      primeiroDia: primeiroDiaDoMes,
-      ultimoDia: ultimoDiaDoMes,
+      firstDay: firstDayOfMonth,
+      lastDay: lastDayOfMonth,
     };
   }
 
   /**
-   * Faz a transformação de um tipo Date em seu primeiro e ultimo segundo do ano
-   * @param date Data selecionada para capturar
-   * @returns Um objeto com os dados do primeiro e ultimo dia do ano
+   * Transforms a Date type into its first and last second of the year
+   * @param date Selected date to capture
+   * @returns An object with the data of the first and last day of the year
    * @example
    *         2022-01-21T03:00:00.000Z
-   *         para
-   *         #primeiroDia: 2022-01-01T03:00:00.000Z
-   *         #ultimoDia: 2022-12-31T03:00:00.000Z
+   *         to
+   *         #firstDay: 2022-01-01T03:00:00.000Z
+   *         #lastDay: 2022-12-31T03:00:00.000Z
    */
-  public static dateParaUltimoEPrimeiroDiaDoAno(date: Date): {
-    ultimoDia: Date;
-    primeiroDia: Date;
-    meses: {
-      jan: IPrimeiroEUltimoDiaDoMes;
-      fev: IPrimeiroEUltimoDiaDoMes;
-      mar: IPrimeiroEUltimoDiaDoMes;
-      abr: IPrimeiroEUltimoDiaDoMes;
-      mai: IPrimeiroEUltimoDiaDoMes;
-      jun: IPrimeiroEUltimoDiaDoMes;
-      jul: IPrimeiroEUltimoDiaDoMes;
-      ago: IPrimeiroEUltimoDiaDoMes;
-      set: IPrimeiroEUltimoDiaDoMes;
-      out: IPrimeiroEUltimoDiaDoMes;
-      nov: IPrimeiroEUltimoDiaDoMes;
-      dez: IPrimeiroEUltimoDiaDoMes;
+  public static dateToFirstAndLastDayOfYear(date: Date): {
+    lastDay: Date;
+    firstDay: Date;
+    months: {
+      jan: IFirstAndLastDayOfMonth;
+      feb: IFirstAndLastDayOfMonth;
+      mar: IFirstAndLastDayOfMonth;
+      apr: IFirstAndLastDayOfMonth;
+      may: IFirstAndLastDayOfMonth;
+      jun: IFirstAndLastDayOfMonth;
+      jul: IFirstAndLastDayOfMonth;
+      aug: IFirstAndLastDayOfMonth;
+      sep: IFirstAndLastDayOfMonth;
+      oct: IFirstAndLastDayOfMonth;
+      nov: IFirstAndLastDayOfMonth;
+      dec: IFirstAndLastDayOfMonth;
     };
   } {
-    // Obtenha o ano, mês e dia da data original.
-    const ano = date.getUTCFullYear();
-    // const mes = date.getUTCMonth();
+    // Get the year, month, and day of the original date.
+    const year = date.getUTCFullYear();
+    // const month = date.getUTCMonth();
 
-    // Crie uma nova data com o ano, mês e dia obtidos na etapa anterior.
-    const primeiroDiaDoAno = this.criarDate(ano, 0, 1, 0, 0, 1);
+    // Create a new date with the year, month, and day obtained in the previous step.
+    const firstDayOfYear = this.createDate(year, 0, 1, 0, 0, 1);
 
-    const ultimoDiaDoAno = this.criarDate(ano + 1, 0, -1, 20, 59, 59);
+    const lastDayOfYear = this.createDate(year + 1, 0, -1, 20, 59, 59);
 
-    const meses = {
-      jan: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 0, 15)),
-      fev: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 1, 15)),
-      mar: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 2, 15)),
-      abr: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 3, 15)),
-      mai: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 4, 15)),
-      jun: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 5, 15)),
-      jul: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 6, 15)),
-      ago: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 7, 15)),
-      set: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 8, 15)),
-      out: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 9, 15)),
-      nov: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 10, 15)),
-      dez: this.dateParaUltimoEPrimeiroDiaDoMes(this.criarDate(ano, 11, 15)),
+    const months = {
+      jan: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 0, 15)),
+      feb: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 1, 15)),
+      mar: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 2, 15)),
+      apr: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 3, 15)),
+      may: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 4, 15)),
+      jun: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 5, 15)),
+      jul: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 6, 15)),
+      aug: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 7, 15)),
+      sep: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 8, 15)),
+      oct: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 9, 15)),
+      nov: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 10, 15)),
+      dec: this.dateToFirstAndLastDayOfMonth(this.createDate(year, 11, 15)),
     };
 
     return {
-      primeiroDia: primeiroDiaDoAno,
-      ultimoDia: ultimoDiaDoAno,
-      meses,
+      firstDay: firstDayOfYear,
+      lastDay: lastDayOfYear,
+      months,
     };
   }
 
   /**
-   * Faz a busca do dia da semana Atual
+   * Searches for the current day of the week
    * @returns
    */
-  public static diaSemana(diaInput?: Date): SemanaEnum {
-    const data = diaInput ? diaInput : this.criarDate();
-    const dia = data.getUTCDay();
+  public static dayOfWeek(dayInput?: Date): WeekEnum {
+    const date = dayInput ? dayInput : this.createDate();
+    const day = date.getUTCDay();
 
-    switch (dia) {
+    switch (day) {
       case 0:
-        return SemanaEnum.domingo;
+        return WeekEnum.sunday;
       case 1:
-        return SemanaEnum.segunda;
+        return WeekEnum.monday;
       case 2:
-        return SemanaEnum.terca;
+        return WeekEnum.tuesday;
       case 3:
-        return SemanaEnum.quarta;
+        return WeekEnum.wednesday;
       case 4:
-        return SemanaEnum.quinta;
+        return WeekEnum.thursday;
       case 5:
-        return SemanaEnum.sexta;
+        return WeekEnum.friday;
       case 6:
-        return SemanaEnum.sabado;
+        return WeekEnum.saturday;
     }
 
-    throw new Error("Dia da semana não encontrado");
+    throw new Error("Day of the week not found");
   }
 
   /**
-   * Faz a busca dos proximos dias do mês atual contando os proximos
+   * Searches for the next days of the current month counting the next
    */
-  public static proximosDiasDoMes(
-    quantidadeDias: number,
-    data?: Date
-  ): IDiaMesAno[] {
-    const dia1 = data ? data : this.criarDate();
+  public static nextDaysOfMonth(
+    numberOfDays: number,
+    date?: Date
+  ): IDayMonthYear[] {
+    const day1 = date ? date : this.createDate();
 
-    const dias: IDiaMesAno[] = [
+    const days: IDayMonthYear[] = [
       {
-        dia: dia1.getUTCDate(),
-        mes: dia1.getUTCMonth() + 1,
-        ano: dia1.getUTCFullYear(),
-        diaSemana: this.diaSemana(dia1),
+        day: day1.getUTCDate(),
+        month: day1.getUTCMonth() + 1,
+        year: day1.getUTCFullYear(),
+        dayOfWeek: this.dayOfWeek(day1),
       },
     ];
 
     let a = 0;
-    while (a < quantidadeDias - 1) {
-      dia1.setUTCDate(dia1.getUTCDate() + 1);
-      dias.push({
-        dia: dia1.getUTCDate(),
-        mes: dia1.getUTCMonth() + 1,
-        ano: dia1.getUTCFullYear(),
-        diaSemana: this.diaSemana(dia1),
+    while (a < numberOfDays - 1) {
+      day1.setUTCDate(day1.getUTCDate() + 1);
+      days.push({
+        day: day1.getUTCDate(),
+        month: day1.getUTCMonth() + 1,
+        year: day1.getUTCFullYear(),
+        dayOfWeek: this.dayOfWeek(day1),
       });
       a++;
     }
 
-    return dias;
+    return days;
   }
 
   /**
-   * Faz a conversão de um tipo Date para YYYY-MM-DD
-   * @param data Tipo Data
-   * @example 2022-01-21T03:00:00.000Z para "2022-01-21"
+   * Converts a Date type to YYYY-MM-DD
+   * @param date Date type
+   * @example 2022-01-21T03:00:00.000Z to "2022-01-21"
    */
-  public static dataParaStringComTracos(data: Date): string {
-    return `${data.getUTCFullYear()}-${this.padraoDiaMes(
-      (data.getUTCMonth() + 1).toString()
-    )}-${this.padraoDiaMes(data.getUTCDate().toString())}`;
+  public static dateToStringWithDashes(date: Date): string {
+    return `${date.getUTCFullYear()}-${this.dayMonthPattern(
+      (date.getUTCMonth() + 1).toString()
+    )}-${this.dayMonthPattern(date.getUTCDate().toString())}`;
   }
 }

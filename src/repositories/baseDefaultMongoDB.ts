@@ -1,9 +1,9 @@
 import { BaseModel } from "@src/model";
-import { CUSTOM_VALIDATION } from "@src/util/errors/comum-todos";
+import { CUSTOM_VALIDATION } from "@src/util/errors/allComum";
 import { InternalError } from "@src/util/errors/internal-error";
 import logger from "@src/util/logger";
 import { Error, Model } from "mongoose";
-import { AttData, FilterOptions, PopulateOptionsPersonalizado } from ".";
+import { AttData, CustomPopulateOptions, FilterOptions } from ".";
 import {
   DatabaseInternalError,
   DatabaseUnknownClientError,
@@ -12,13 +12,12 @@ import {
 } from "./repository";
 
 /**
- * Class que contém informações basicas de cada model do mongo
+ * Class that contains basic information for each MongoDB model
  * @public create
  * @public findOne
  * @public findById
-
  */
-export abstract class BasePadraoMongoDB<
+export abstract class BaseDefaultMongoDB<
   T extends BaseModel,
   K,
 > extends Repository<T, K> {
@@ -38,7 +37,7 @@ export abstract class BasePadraoMongoDB<
 
   public async findOne<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado
+    populate?: CustomPopulateOptions
   ): Promise<I | null> {
     try {
       const response = await this.model.findOne(options, {}, { populate });
@@ -53,7 +52,7 @@ export abstract class BasePadraoMongoDB<
 
   public async findById<I = K>(
     id: string,
-    populate?: PopulateOptionsPersonalizado
+    populate?: CustomPopulateOptions
   ): Promise<I | null> {
     try {
       const response = await this.model.findById(id, {}, { populate });
@@ -68,9 +67,9 @@ export abstract class BasePadraoMongoDB<
 
   public async deleteMany(options: FilterOptions): Promise<number> {
     try {
-      const deletados = await this.model.deleteMany(options);
+      const deleted = await this.model.deleteMany(options);
 
-      return deletados.deletedCount;
+      return deleted.deletedCount;
     } catch (error) {
       this.handlerError(error);
     }
@@ -78,14 +77,14 @@ export abstract class BasePadraoMongoDB<
 
   public async find<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado[]
+    populate?: CustomPopulateOptions[]
   ): Promise<I[]> {
     try {
-      const dados = await this.model
+      const data = await this.model
         .find(options, {}, { populate })
         .sort({ createAt: "asc" });
 
-      return dados.map((d) => d.toObject<I>());
+      return data.map((d) => d.toObject<I>());
     } catch (error) {
       this.handlerError(error);
     }
@@ -113,7 +112,7 @@ export abstract class BasePadraoMongoDB<
     }
   }
 
-  public async existe(options: FilterOptions): Promise<boolean> {
+  public async exists(options: FilterOptions): Promise<boolean> {
     try {
       const data = await this.model.exists(options);
 
@@ -134,19 +133,19 @@ export abstract class BasePadraoMongoDB<
       );
 
       if (duplicatedKindErrors.length > 0)
-        throw new DatabaseValidationError(`Valor duplicado: ${error.message}`);
+        throw new DatabaseValidationError(`Duplicate value: ${error.message}`);
 
       throw new DatabaseUnknownClientError(
-        `Erro de validação: ${error.message}`
+        `Validation error: ${error.message}`
       );
     } else if (error instanceof Error.CastError)
       throw new DatabaseValidationError(
-        `O valor ${error.value} não é valido para o campo ${error.path}`
+        `The value ${error.value} is not valid for the field ${error.path}`
       );
 
-    logger.error(`Error interno inesperado: ${error}`);
+    logger.error(`Unexpected internal error: ${error}`);
     throw new DatabaseInternalError(
-      `Erro interno inesperado: ${(error as Error).message}`,
+      `Unexpected internal error: ${(error as Error).message}`,
       500,
       "DatabaseInternalError"
     );

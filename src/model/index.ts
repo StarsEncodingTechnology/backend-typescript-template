@@ -1,36 +1,36 @@
-import Validador from "@src/util/validacoes/validarInfo";
+import Validator from "@src/util/validations/validateInfo";
 import { Types } from "mongoose";
 
 export interface BaseModel {}
 
 /**
- * Tipo base quando for usar o ObjectId
+ * Base type when using ObjectId
  */
 export type BaseStringObjectId = string | Types.ObjectId;
 
 /**
- * Tipo base para o toJSON
+ * Base type for toJSON
  */
-export type BaseDepoisToObject<T, K> = T & {
+export type BaseAfterToObject<T, K> = T & {
   /**
-   * Em caso de error com alguma informação pode ser erro de conversão, por não ser vinculado ao to toJSON
+   * In case of an error with some information, it may be a conversion error, as it is not linked to toJSON
    */ toJSON: () => K;
 };
 
 /**
- * Faz a conversão de um campo para ObjectId para String caso seja, caso não seja,
- * Converte para o tipo que está no campo.
- * Faz a mudança direto no objeto passado
- * @param ret Informação obtida do banco de dados quando toObject é executado
- * @param campos Campos que vão passar pela conversão
- * @returns o ret modificado
+ * Converts a field to ObjectId to String if it is, if not,
+ * Converts to the type that is in the field.
+ * Makes the change directly in the passed object
+ * @param ret Information obtained from the database when toObject is executed
+ * @param fields Fields that will go through the conversion
+ * @returns the modified ret
  */
-export function converteCasoNecessario(
+export function convertIfNecessary(
   ret: Record<string, unknown>,
-  campos: string[]
+  fields: string[]
 ): undefined {
-  campos.forEach((campo) => {
-    const antesCampo = ret[campo] as
+  fields.forEach((field) => {
+    const beforeField = ret[field] as
       | Types.ObjectId
       | Record<string, unknown>
       | Types.ObjectId[]
@@ -38,30 +38,29 @@ export function converteCasoNecessario(
       | string
       | null;
 
-    if (!antesCampo) return;
+    if (!beforeField) return;
 
-    if (typeof antesCampo === "string") return;
+    if (typeof beforeField === "string") return;
 
-    if (Validador.ObjectIdMongoose(antesCampo as Types.ObjectId)) {
-      if (campo === "_id") {
-        ret["id"] = antesCampo.toString();
+    if (Validator.ObjectIdMongoose(beforeField as Types.ObjectId)) {
+      if (field === "_id") {
+        ret["id"] = beforeField.toString();
         delete ret["_id"];
         return;
       }
 
-      ret[campo] = antesCampo.toString();
+      ret[field] = beforeField.toString();
       return;
     }
-    // asd
 
-    if (Array.isArray(antesCampo)) {
-      ret[campo] = antesCampo.map((item) => {
-        if (Validador.ObjectIdMongoose(item as Types.ObjectId)) {
+    if (Array.isArray(beforeField)) {
+      ret[field] = beforeField.map((item) => {
+        if (Validator.ObjectIdMongoose(item as Types.ObjectId)) {
           return item.toString();
         }
 
         if (typeof item === "object") {
-          converteCasoNecessario(
+          convertIfNecessary(
             item as Record<string, unknown>,
             Object.keys(item)
           );
@@ -73,10 +72,10 @@ export function converteCasoNecessario(
       return;
     }
 
-    if (typeof antesCampo === "object") {
-      converteCasoNecessario(
-        antesCampo as Record<string, unknown>,
-        Object.keys(antesCampo)
+    if (typeof beforeField === "object") {
+      convertIfNecessary(
+        beforeField as Record<string, unknown>,
+        Object.keys(beforeField)
       );
     }
   });

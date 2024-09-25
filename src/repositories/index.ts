@@ -1,15 +1,15 @@
-// Arquivo de configuração de abstração do Banco de dados
-// Serve para se utilizar diversos bancos de dados no mesmo sistema de forma que eles não se atrapalhem
-// Bloqueando erros de bibliotecas subirem para outros ambientes
+// Database abstraction configuration file
+// Used to utilize multiple databases in the same system so that they do not interfere with each other
+// Preventing library errors from propagating to other environments
 
-import { TokenUser, User, UserDepoisToObject } from "@src/model/user";
+import { User, UserAfterToObject, UserToken } from "@src/model/user";
 
 import {
   LogError,
   LogErrorDepoisToObject,
   LogErrosAgrupadosPorCode,
 } from "@src/model/logError";
-import { JWTGeradoInterface } from "@src/services/authService";
+import { GeneratedJWTInterface } from "@src/services/authService";
 import { PopulateOptions } from "mongoose";
 
 export type FilterOptions = Record<string, unknown>;
@@ -17,140 +17,136 @@ export type FilterOptions = Record<string, unknown>;
 export type AttData = Record<string, unknown>;
 
 /**
- * Options para populatar as informações
- * @param path campo que será populado
- * @param campos campos que serão populados
- * @param populate populado de forma recursiva podendo popular mais de um campo
+ * Options to populate information
+ * @param path field to be populated
+ * @param campos fields to be populated
+ * @param populate recursively populated, can populate more than one field
  */
-export interface PopulateOptionsPersonalizado extends PopulateOptions {}
+export interface CustomPopulateOptions extends PopulateOptions {}
 
 /**
- * Base para todos os Repositorios
+ * Base for all Repositories
  */
 export interface BaseRepository<T, K> {
   /**
-   * Faz a criação no banco de dados
-   * @param data informação a ser salva
+   * Creates a record in the database
+   * @param data information to be saved
    */
   create(data: Partial<T>): Promise<K>;
   /**
-   * Faz a busca da informação com base nos parametros passados,
-   * a informação pelo populate tem que ser ajustada diretamente no Schema do model
-   * para não quebrar o sistema
-   * @param options Options para Query localizar
-   * @param populate Options para Query localizar com populate
+   * Searches for information based on the passed parameters,
+   * the information for populate must be adjusted directly in the model Schema
+   * to avoid breaking the system
+   * @param options Options for Query to locate
+   * @param populate Options for Query to locate with populate
    */
   findOne<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado
+    populate?: CustomPopulateOptions
   ): Promise<I | null>;
 
   /**
-   * Faz a busca de uma informação com base no ip passado
-   * @param id para localização da informação
+   * Searches for information based on the passed id
+   * @param id to locate the information
    */
   findById<I = K>(
     id: string,
-    populate?: PopulateOptionsPersonalizado
+    populate?: CustomPopulateOptions
   ): Promise<I | null>;
 
   /**
-   * Faz a busca de informações no banco de dados
-   * @param options Opções que serão buscadas
+   * Searches for information in the database
+   * @param options Options to be searched
    */
   find<I = K>(
     options: FilterOptions,
-    populate?: PopulateOptionsPersonalizado[]
+    populate?: CustomPopulateOptions[]
   ): Promise<I[]>;
 
   /**
-   * Deleta varias informações ao mesmo tempo
-   * @param option Opções que serão deletados
+   * Deletes multiple records at once
+   * @param options Options to be deleted
    */
   deleteMany(options: FilterOptions): Promise<number>;
 
   /**
-   * Deleta um unico alvo
-   * @param options objetivo que vai ser deletado
+   * Deletes a single record
+   * @param options target to be deleted
    */
   deleteOne(options: FilterOptions): Promise<number>;
 
   /**
-   * Faz a atualização de informações de um unico ID
-   * @param id do dados que será atualizado
-   * @param dado dados que serão atualizados
+   * Updates information for a single ID
+   * @param id of the data to be updated
+   * @param att data to be updated
    */
   updateById(id: string, att: AttData): Promise<boolean>;
 
   /**
-   * Faz a verificação se informação existe no banco de dados
-   * @param options Options para Query localizar
+   * Checks if information exists in the database
+   * @param options Options for Query to locate
    */
-  existe(options: FilterOptions): Promise<boolean>;
+  exists(options: FilterOptions): Promise<boolean>;
 }
 
 /**
  * User Repository
  */
 export interface UserRepository
-  extends BaseRepository<User, UserDepoisToObject> {
+  extends BaseRepository<User, UserAfterToObject> {
   /**
-   * Faz a comparação da senha
+   * Compares the password
    * @param email
    * @param password
    */
-  comparaSenha(
+  comparePassword(
     email: string,
     password: string
-  ): Promise<UserDepoisToObject | undefined>;
+  ): Promise<UserAfterToObject | undefined>;
   /**
-   * Adiciona o JWT no banco de dados
-   * @param id id do usuario
-   * @param jwt objeto com o jwt e o tempo de expiração
-   * @param ip ip do usuario
-   * @param ativo se o jwt está ativo ou não
+   * Adds the JWT to the database
+   * @param id user id
+   * @param jwt object with the jwt and expiration time
+   * @param ip user ip
+   * @param active if the jwt is active or not
    * @returns
    */
-  adicionarJWTs(
-    id: string,
-    jwt: JWTGeradoInterface,
-    ip: string
-  ): Promise<boolean>;
+  addJWTs(id: string, jwt: GeneratedJWTInterface, ip: string): Promise<boolean>;
 
   /**
-   * Seta o token de recuperação de senha no banco de dados
-   * @param id id do usuario
-   * @param token token de recuperação de senha
-   * @param expiraEm tempo de expiração do token
+   * Sets the password recovery token in the database
+   * @param id user id
+   * @param token password recovery token
+   * @param expiresIn token expiration time
    */
-  setTokenRecuperacaoSenha(
+  setPasswordRecoveryToken(
     id: string,
     token: string,
-    expiraEm: Date
-  ): Promise<TokenUser>;
+    expiresIn: Date
+  ): Promise<UserToken>;
   /**
-   * Faz a verificação se o token existe no banco de dados e se está valido para uso
+   * Checks if the token exists in the database and is valid for use
    * @param token
    */
-  existsTokenReset(token: string): Promise<boolean>;
+  existsResetToken(token: string): Promise<boolean>;
 
   /**
-   * Seta o token de confirmação de email no DB
+   * Sets the email confirmation token in the DB
    * @param id  User_id
-   * @param token  token de confirmação
-   * @param expiraEm tempo maximmo para confirmação
+   * @param token  confirmation token
+   * @param expiresIn maximum time for confirmation
    */
-  setaTokenConfirmacaoEmail(
+  setEmailConfirmationToken(
     id: string,
     token: string,
-    expiraEm: Date
+    expiresIn: Date
   ): Promise<boolean>;
 
   /**
-   * Faz a verificação se o token de confirmação de email existe no banco de dados
+   * Checks if the email confirmation token exists in the database
    * @param token
    */
-  existsTokenConfirmacaoEmail(token: string): Promise<string | undefined>;
+  existsEmailConfirmationToken(token: string): Promise<string | undefined>;
 }
 
 /**
@@ -159,7 +155,7 @@ export interface UserRepository
 export interface LogErrorRepository
   extends BaseRepository<LogError, LogErrorDepoisToObject> {
   /**
-   * Agrupo os erros por code
+   * Groups errors by code
    */
-  agruparPorCode(filtro: FilterOptions): Promise<LogErrosAgrupadosPorCode[]>;
+  groupByCode(filter: FilterOptions): Promise<LogErrosAgrupadosPorCode[]>;
 }

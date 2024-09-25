@@ -1,48 +1,46 @@
-import { EnumEstadoUser, UserDepoisToJSON } from "@src/model/user";
+import { UserAfterToJSON, UserState } from "@src/model/user";
 import { UserMongoDBRepository } from "@src/repositories/uso/userMongoDBRepository";
 import { InternalError } from "@src/util/errors/internal-error";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export interface UserDecoded extends UserDepoisToJSON {}
+export interface UserDecoded extends UserAfterToJSON {}
 
 /**
- * Interface que contém o JWT e o tempo para ele expirar
- * @param jwt é uma string que contém o JWT
- * @param expiraEm é uma data que contém o tempo para o JWT expirar
+ * Interface that contains the JWT and the time for it to expire
+ * @param jwt is a string that contains the JWT
+ * @param expiresIn is a date that contains the time for the JWT to expire
  */
-export interface JWTGeradoInterface {
+export interface GeneratedJWTInterface {
   jwt: string;
-  expiraEm: Date;
+  expiresIn: Date;
 }
 
 /**
- * Interface que contém o token de 6 digitos e o tempo para ele expirar
- * @param token é uma string que contém o token de 6 digitos
- * @param expiraEm é uma data que contém o tempo para o token expirar
+ * Interface that contains the 6-digit token and the time for it to expire
+ * @param token is a string that contains the 6-digit token
+ * @param expiresIn is a date that contains the time for the token to expire
  */
-export interface Token6Digitos {
+export interface Token6Digits {
   token: string;
-  expiraEm: Date;
+  expiresIn: Date;
 }
 
-export class AuthServiceDecodarError extends InternalError {
+export class AuthServiceDecodeError extends InternalError {
   constructor(message: string, code = 401) {
-    super(`${message}`, code, "AuthServiceDecodarError");
+    super(`${message}`, code, "AuthServiceDecodeError");
   }
 }
 
 /**
- * Essa é a classe que vai lidar com todas as informações envolvendo a
- * autenticação do usuario.
+ * This is the class that will handle all the information involving user authentication.
  */
 export class AuthService {
   // constructor(protected userRepository = new userMongoDBRepository()) {}
   /**
-   * Serve para criptografar a string passa.
-   * @param password  A senha passa para se fazer a criptografia da mesma
-   * @returns retorno uma promise de string, que retornar o texto password
-   * já como hash.
+   * Used to encrypt the given string.
+   * @param password The password passed to be encrypted
+   * @returns returns a promise of string, which returns the password text already as hash.
    */
   public static async hashPassword(
     password: string,
@@ -52,13 +50,12 @@ export class AuthService {
     return await bcrypt.hash(password, salt);
   }
   /**
-   * Serve para comparar a string com o stringHash vindo do db.
-   * @param password recebe a senha passada para a comparação
-   * @param passwordHash recebe a senhaHash para a comparação
-   * @returns Retorna uma promise booleaon caso a senha coincida true.
-   * caso não false.
+   * Used to compare the string with the stringHash coming from the db.
+   * @param password receives the password passed for comparison
+   * @param passwordHash receives the passwordHash for comparison
+   * @returns Returns a boolean promise if the password matches true. if not false.
    */
-  public static async comparaPassword(
+  public static async comparePassword(
     password: string,
     passwordHash: string
   ): Promise<boolean> {
@@ -66,15 +63,15 @@ export class AuthService {
   }
 
   /**
-   * Server para gerar um jwt com base em algum obj, tornando ele unico.
-   * @param payload é um obj que pode conter qualquer informação
-   * @returns retornar um OBJ que contém o JWT e o Tempo apra ele expirar
+   * Used to generate a jwt based on some obj, making it unique.
+   * @param payload is an obj that can contain any information
+   * @returns returns an OBJ that contains the JWT and the time for it to expire
    */
-  public static gerarJWT(
+  public static generateJWT(
     payload: object,
-    sign = process.env.SEGREDOJWT as string,
+    sign = process.env.JWT_SECRET as string,
     time: string | null = "24h"
-  ): JWTGeradoInterface {
+  ): GeneratedJWTInterface {
     return {
       jwt: jwt.sign(
         payload,
@@ -85,33 +82,33 @@ export class AuthService {
               expiresIn: time,
             }
       ),
-      expiraEm: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      expiresIn: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
   }
 
-  public static validaJWT(
+  public static validateJWT(
     token: string,
-    sign = process.env.SEGREDOJWT as string
+    sign = process.env.JWT_SECRET as string
   ) {
     return jwt.verify(token, sign);
   }
 
   /**
-   * Server para validar a string o token que é um JWT
-   * @param token é uma string JWT
-   * @returns retorna a informação que está dentro do JWT
+   * Used to validate the string token which is a JWT
+   * @param token is a JWT string
+   * @returns returns the information inside the JWT
    */
-  public static async decodarJWT(
+  public static async decodeJWT(
     token: string,
     url: string,
-    sign = process.env.SEGREDOJWT as string,
+    sign = process.env.JWT_SECRET as string,
     userRepository = new UserMongoDBRepository()
   ): Promise<{ userDecoded: UserDecoded; ip: string }> {
-    const decoded = this.validaJWT(token, sign) as { id: string };
+    const decoded = this.validateJWT(token, sign) as { id: string };
     const { id } = decoded;
 
-    // @TODO verificar se o JWT está ativo
-    // @TODO verificar se o JWT está expirado
+    // @TODO check if the JWT is active
+    // @TODO check if the JWT is expired
 
     const userJWTCount = await userRepository.findOne({
       $and: [
@@ -120,9 +117,9 @@ export class AuthService {
           JWTs: {
             $elemMatch: {
               jwt: token,
-              ativo: true,
+              active: true,
               $gt: {
-                expiraEm: new Date(),
+                expiresIn: new Date(),
               },
             },
           },
@@ -130,33 +127,36 @@ export class AuthService {
       ],
     });
 
-    // @TODO se IP's diferentes necessidade de uma nova autenticação
-    if (!userJWTCount) throw new AuthServiceDecodarError("JWT invalido");
+    // @TODO if different IPs need new authentication
+    if (!userJWTCount) throw new AuthServiceDecodeError("Invalid JWT");
 
-    // // Valição de estado do usuario
-    switch (userJWTCount.estado) {
-      case EnumEstadoUser.bloqueado:
-        throw new AuthServiceDecodarError("Usuario Bloqueado", 473);
+    // // User state validation
+    switch (userJWTCount.state) {
+      case UserState.blocked:
+        throw new AuthServiceDecodeError("User Blocked", 473);
     }
 
     return {
       userDecoded: userJWTCount.toJSON(),
-      ip: userJWTCount.JWTs.find((jwt) => jwt.jwt == token)?.ip || "257",
+      ip:
+        userJWTCount.JWTs.find(
+          (jwt: { jwt: string; ip: string }) => jwt.jwt == token
+        )?.ip || "257",
     };
   }
 
   /**
-   * Faz A geração de um token de 6 digitos
-   * @returns  um token de 6 digitos random
+   * Generates a 6-digit token
+   * @returns a random 6-digit token
    */
-  public static gerarTokenDe6Digitos(): Token6Digitos {
+  public static generate6DigitToken(): Token6Digits {
     const digits = "0123456789";
     let code = "";
     for (let i = 0; i < 6; i++) {
       code += digits.charAt(Math.floor(Math.random() * digits.length));
     }
 
-    const expiraEm30Minutos = new Date(Date.now() + 30 * 60 * 1000);
-    return { token: code, expiraEm: expiraEm30Minutos };
+    const expiresIn30Minutes = new Date(Date.now() + 30 * 60 * 1000);
+    return { token: code, expiresIn: expiresIn30Minutes };
   }
 }

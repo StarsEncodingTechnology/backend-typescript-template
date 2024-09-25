@@ -1,18 +1,18 @@
 import { model, Schema } from "mongoose";
 import {
-  BaseDepoisToObject,
+  BaseAfterToObject,
   BaseModel,
   BaseStringObjectId,
-  converteCasoNecessario,
+  convertIfNecessary,
 } from ".";
 
 export interface LogError extends BaseModel {
   /**
-   * Rotas que geraram o erro
+   * Routes that generated the error
    */
   path: string;
   /**
-   * Metodo que gerou o erro
+   * Method that generated the error
    */
   method: string;
 
@@ -21,41 +21,41 @@ export interface LogError extends BaseModel {
    */
   message: string;
   /**
-   * Lista de funcões que o erro passou
+   * List of functions the error passed through
    */
   stack: string;
   /**
-   * Codigo do erro
+   * Error code
    */
   code: number;
   /**
-   * faz referencia ao id do usuario que gerou o erro
+   * References the ID of the user who generated the error
    */
   user_id?: BaseStringObjectId;
 
   /**
-   * Data de criação do erro
+   * Class of the error
    */
   classError?: string;
   /**
-   * Data de criação do erro
+   * Error creation date
    */
   createdAt?: Date;
 }
 
-export interface LogErrorComId extends LogError {
+export interface LogErrorWithId extends LogError {
   id: string;
   user_id?: string;
   /**
-   * Data de criação do erro
+   * Error creation date
    */
   createdAt: Date;
 }
 
-export interface LogErrorDepoisToObject extends Omit<LogErrorComId, ""> {}
+export interface LogErrorAfterToObject extends Omit<LogErrorWithId, ""> {}
 
-export interface LogErrorDepoisToObject
-  extends BaseDepoisToObject<LogErrorComId, LogErrorDepoisToObject> {}
+export interface LogErrorAfterToObject
+  extends BaseAfterToObject<LogErrorWithId, LogErrorAfterToObject> {}
 
 const schema = new Schema<LogError>(
   {
@@ -87,7 +87,7 @@ const schema = new Schema<LogError>(
         delete ret._id;
         delete ret.__v;
 
-        converteCasoNecessario(ret, ["user_id"]);
+        convertIfNecessary(ret, ["user_id"]);
 
         ret.toJSON = () => ret;
       },
@@ -98,9 +98,9 @@ const schema = new Schema<LogError>(
 export const LogError = model<LogError>("LogError", schema);
 
 /**
- * Interface para agrupar os erros por code
+ * Interface to group errors by code
  */
-export interface LogErrosAgrupadosPorCode {
+export interface ErrorsGroupedByCode {
   code: number;
-  quantidade: number;
+  quantity: number;
 }
