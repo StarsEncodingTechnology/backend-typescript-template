@@ -3,6 +3,9 @@
 This project aims to demonstrate the code standards that should be used in a back-end application.
 The project uses Node.js with TypeScript, Express, MongoDB, and Jest.
 
+Set up the `.env` and `.env.test` files as shown in the `.env.default` model.
+Don't forget to start the MongoDB application and place the appropriate variables in their respective locations.
+
 # Running Tests
 
 To run the tests for this project, follow these steps:
